@@ -1,0 +1,73 @@
+{
+  "name": "vibealive",
+  "version": "1.1.0",
+  "description": "Universal Next.js code analysis tool to identify unused files, dead code, and redundant API endpoints",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "vibealive": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "prepublishOnly": "npm run build",
+    "local-repack": "npm run build && npm unlink -g vibealive && npm link"
+  },
+  "keywords": [
+    "nextjs",
+    "static-analysis",
+    "code-analysis",
+    "unused-code",
+    "dead-code",
+    "typescript",
+    "react"
+  ],
+  "author": "Next Analyzer Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skullzarmy/vibealive.git"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "express": "^5.1.0",
+    "fast-glob": "^3.3.0",
+    "fs-extra": "^11.1.0",
+    "jsonc-parser": "^3.3.1",
+    "ora": "^7.0.0",
+    "semver": "^7.5.0",
+    "table": "^6.8.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.1",
+    "@types/express": "^5.0.3",
+    "@types/fs-extra": "^11.0.1",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.45.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ]
+}
