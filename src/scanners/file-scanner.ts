@@ -48,14 +48,13 @@ export class FileScanner {
   }
 
   private buildScanPatterns(): string[] {
-    const patterns = ['**/*.{js,jsx,ts,tsx}', '**/*.{mjs,cjs}', '**/*.json', '**/*.md', '**/*.mdx'];
-
-    // Add custom include patterns
-    if (this.config.includePatterns) {
-      patterns.push(...this.config.includePatterns);
+    // Use custom include patterns if provided, otherwise use defaults
+    if (this.config.includePatterns && this.config.includePatterns.length > 0) {
+      return [...this.config.includePatterns];
     }
-
-    return patterns;
+    
+    // Default patterns
+    return ['**/*.{js,jsx,ts,tsx}', '**/*.{mjs,cjs}', '**/*.json', '**/*.md', '**/*.mdx'];
   }
 
   private buildExcludePatterns(): string[] {
