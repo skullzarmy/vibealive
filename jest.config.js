@@ -25,4 +25,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 30000,
   verbose: true,
+  // Run tests in band to avoid fixture conflicts in parallel execution
+  maxWorkers: 1,
 };

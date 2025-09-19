@@ -3,10 +3,19 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 
 describe('CLI', () => {
-  const testProjectPath = path.join(__dirname, 'fixtures', 'test-cli-project');
+  let testProjectCounter = 0;
+  
+  const getTestProjectPath = () => {
+    testProjectCounter++;
+    return path.join(__dirname, 'fixtures', `test-cli-project-${testProjectCounter}-${Date.now()}`);
+  };
+
+  let testProjectPath: string;
   const cliPath = path.join(__dirname, '../../dist/cli.js');
 
   beforeAll(async () => {
+    testProjectPath = getTestProjectPath();
+    
     // Create test project structure
     await fs.ensureDir(testProjectPath);
     await fs.ensureDir(path.join(testProjectPath, 'app'));

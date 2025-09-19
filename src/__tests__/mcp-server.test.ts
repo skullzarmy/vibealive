@@ -7,6 +7,56 @@ import * as path from 'path';
 describe('MCP Server', () => {
   // Note: These are integration tests that require a running MCP server
   // They are skipped by default to avoid server dependencies in CI
+  const testProjectPath = path.join(__dirname, 'fixtures', 'test-mcp-project');
+  let serverPort: number;
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    // Create test project structure for MCP tests (even though tests are skipped)
+    await fs.ensureDir(testProjectPath);
+    await fs.ensureDir(path.join(testProjectPath, 'app'));
+    await fs.ensureDir(path.join(testProjectPath, 'components'));
+
+    // Create package.json
+    await fs.writeJson(path.join(testProjectPath, 'package.json'), {
+      name: 'test-mcp-project',
+      dependencies: {
+        next: '^14.0.0',
+        react: '^18.0.0',
+      },
+    });
+
+    // Create test files
+    await fs.writeFile(
+      path.join(testProjectPath, 'app', 'page.tsx'),
+      `export default function HomePage() {
+        return <div>Home</div>;
+      }`
+    );
+
+    await fs.writeFile(
+      path.join(testProjectPath, 'components', 'Button.tsx'),
+      `export default function Button() {
+        return <button>Click me</button>;
+      }`
+    );
+
+    await fs.writeFile(
+      path.join(testProjectPath, 'components', 'UnusedComponent.tsx'),
+      `export default function UnusedComponent() {
+        return <div>Never used</div>;
+      }`
+    );
+
+    // Setup server configuration (even though tests are skipped)
+    serverPort = 8081 + Math.floor(Math.random() * 1000);
+    baseUrl = `http://localhost:${serverPort}/mcp`;
+  });
+
+  afterAll(async () => {
+    await fs.remove(testProjectPath);
+  });
+
   describe.skip('MCP Protocol Compliance', () => {
     let sessionId: string;
 
