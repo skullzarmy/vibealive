@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
 import { AnalysisConfig, ProjectStructure, APIEndpoint, HTTPMethod, Reference } from '../types';
 import { ScannedFile } from '../scanners/file-scanner';
@@ -236,7 +235,7 @@ export class APIAnalyzer {
 
   private classifyAPI(
     callSites: Reference[],
-    methods: HTTPMethod[]
+    _methods: HTTPMethod[]
   ): 'ACTIVE' | 'UNUSED' | 'REDUNDANT' {
     if (callSites.length === 0) {
       return 'UNUSED';

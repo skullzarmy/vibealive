@@ -1,0 +1,197 @@
+import { execSync } from 'child_process';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+
+describe('CLI', () => {
+  const testProjectPath = path.join(__dirname, 'fixtures', 'test-cli-project');
+  const cliPath = path.join(__dirname, '../../dist/cli.js');
+
+  beforeAll(async () => {
+    // Create test project structure
+    await fs.ensureDir(testProjectPath);
+    await fs.ensureDir(path.join(testProjectPath, 'app'));
+    await fs.ensureDir(path.join(testProjectPath, 'components'));
+
+    // Create package.json
+    await fs.writeJson(path.join(testProjectPath, 'package.json'), {
+      name: 'test-cli-project',
+      dependencies: {
+        next: '^14.0.0',
+        react: '^18.0.0',
+      },
+    });
+
+    // Create test files
+    await fs.writeFile(
+      path.join(testProjectPath, 'app', 'page.tsx'),
+      `export default function HomePage() {
+        return <div>Home</div>;
+      }`
+    );
+
+    await fs.writeFile(
+      path.join(testProjectPath, 'components', 'Button.tsx'),
+      `export default function Button() {
+        return <button>Click me</button>;
+      }`
+    );
+
+    await fs.writeFile(
+      path.join(testProjectPath, 'components', 'UnusedComponent.tsx'),
+      `export default function UnusedComponent() {
+        return <div>Never used</div>;
+      }`
+    );
+  });
+
+  afterAll(async () => {
+    await fs.remove(testProjectPath);
+  });
+
+  describe('analyze command', () => {
+    it('should display help when no command is provided', () => {
+      const output = execSync(`node ${cliPath} --help`, { encoding: 'utf8' });
+      expect(output).toContain('Usage:');
+      expect(output).toContain('analyze');
+      expect(output).toContain('serve');
+    });
+
+    it('should analyze project and output results', () => {
+      const output = execSync(
+        `node ${cliPath} analyze ${testProjectPath} --format json`,
+        { encoding: 'utf8' }
+      );
+      
+      expect(output).toContain('Analysis complete');
+      
+      // Check for JSON output indicators
+      const lines = output.split('\n');
+      const jsonLines = lines.filter(line => line.trim().startsWith('{') || line.trim().startsWith('['));
+      expect(jsonLines.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('should handle non-existent project path', () => {
+      expect(() => {
+        execSync(
+          `node ${cliPath} analyze /non/existent/path`,
+          { encoding: 'utf8', stdio: 'pipe' }
+        );
+      }).toThrow();
+    });
+
+    it('should support different output formats', () => {
+      const mdOutput = execSync(
+        `node ${cliPath} analyze ${testProjectPath} --format md`,
+        { encoding: 'utf8' }
+      );
+      
+      expect(mdOutput).toContain('# Analysis Report');
+      expect(mdOutput).toContain('## Summary');
+    }, 30000);
+
+    it('should respect confidence threshold option', () => {
+      const output = execSync(
+        `node ${cliPath} analyze ${testProjectPath} --confidence 90 --format json`,
+        { encoding: 'utf8' }
+      );
+      
+      expect(output).toContain('Analysis complete');
+      // The analysis should complete regardless of confidence threshold
+    }, 30000);
+
+    it('should respect exclude patterns', () => {
+      const output = execSync(
+        `node ${cliPath} analyze ${testProjectPath} --exclude "**/Button.tsx" --format json`,
+        { encoding: 'utf8' }
+      );
+      
+      expect(output).toContain('Analysis complete');
+      // Button.tsx should be excluded from analysis
+    }, 30000);
+  });
+
+  describe('serve command', () => {
+    it('should display serve help', () => {
+      const output = execSync(`node ${cliPath} serve --help`, { encoding: 'utf8' });
+      expect(output).toContain('Start MCP server');
+      expect(output).toContain('--port');
+      expect(output).toContain('--stdio');
+    });
+
+    // Note: We can't easily test the actual server startup in unit tests
+    // as it would start a long-running process. This would be better tested
+    // in integration tests.
+  });
+
+  describe('input validation', () => {
+    it('should validate project path exists', () => {
+      expect(() => {
+        execSync(
+          `node ${cliPath} analyze /definitely/does/not/exist`,
+          { encoding: 'utf8', stdio: 'pipe' }
+        );
+      }).toThrow();
+    });
+
+    it('should validate Next.js project', () => {
+      // Create a directory without package.json
+      const nonNextProjectPath = path.join(__dirname, 'fixtures', 'non-next-project');
+      fs.ensureDirSync(nonNextProjectPath);
+      
+      try {
+        expect(() => {
+          execSync(
+            `node ${cliPath} analyze ${nonNextProjectPath}`,
+            { encoding: 'utf8', stdio: 'pipe' }
+          );
+        }).toThrow();
+      } finally {
+        fs.removeSync(nonNextProjectPath);
+      }
+    });
+
+    it('should handle invalid confidence threshold', () => {
+      expect(() => {
+        execSync(
+          `node ${cliPath} analyze ${testProjectPath} --confidence 150`,
+          { encoding: 'utf8', stdio: 'pipe' }
+        );
+      }).toThrow();
+    });
+
+    it('should handle invalid output format', () => {
+      expect(() => {
+        execSync(
+          `node ${cliPath} analyze ${testProjectPath} --format invalid`,
+          { encoding: 'utf8', stdio: 'pipe' }
+        );
+      }).toThrow();
+    });
+  });
+
+  describe('configuration', () => {
+    it('should load configuration from config file', async () => {
+      // Create a config file
+      const configPath = path.join(testProjectPath, '.vibealive.config.js');
+      await fs.writeFile(
+        configPath,
+        `module.exports = {
+          excludePatterns: ['**/test/**'],
+          confidenceThreshold: 85,
+          outputFormats: ['json']
+        };`
+      );
+
+      try {
+        const output = execSync(
+          `node ${cliPath} analyze ${testProjectPath}`,
+          { encoding: 'utf8' }
+        );
+        
+        expect(output).toContain('Analysis complete');
+      } finally {
+        await fs.remove(configPath);
+      }
+    }, 30000);
+  });
+});

@@ -7,6 +7,7 @@ import {
   AnalysisReport,
   ProjectStructure,
   FileAnalysis,
+  FileClassification,
   ComponentGraph,
   APIEndpoint,
   ComponentNode,
@@ -132,11 +133,13 @@ export class NextJSAnalyzer {
   private consolidateFileAnalysis(graph: ComponentGraph, allFiles: ScannedFile[]): FileAnalysis[] {
     const orphanPaths = new Set(graph.orphans.map((o) => o.path));
     const allAnalyzedPaths = new Set(graph.nodes.map((n) => n.path));
+    const scanner = new FileScanner(this.config, this.projectStructure!);
 
     return allFiles.map((file) => {
       const node = graph.nodes.find((n) => n.path === file.path);
       const isOrphan = orphanPaths.has(file.path);
       const isAnalyzed = allAnalyzedPaths.has(file.path);
+      const isAutoInvoked = scanner.isAutoInvokedFile(file.absolutePath);
 
       if (!isAnalyzed) {
         return {
@@ -152,11 +155,24 @@ export class NextJSAnalyzer {
         };
       }
 
-      const classification = isOrphan ? 'UNUSED' : 'ACTIVE';
-      const confidence = isOrphan ? 80 : 100;
-      const reasons = isOrphan
-        ? ['File is not imported by any other reachable file.']
-        : ['File is part of the active dependency graph.'];
+      // Determine classification based on auto-invoked status and orphan status
+      let classification: FileClassification;
+      let confidence: number;
+      let reasons: string[];
+
+      if (isAutoInvoked) {
+        classification = 'AUTO_INVOKED';
+        confidence = 100;
+        reasons = ['File is automatically invoked by Next.js framework (page, layout, loading, error, etc.).'];
+      } else if (isOrphan) {
+        classification = 'UNUSED';
+        confidence = 80;
+        reasons = ['File is not imported by any other reachable file.'];
+      } else {
+        classification = 'ACTIVE';
+        confidence = 100;
+        reasons = ['File is part of the active dependency graph.'];
+      }
 
       return {
         path: file.path,

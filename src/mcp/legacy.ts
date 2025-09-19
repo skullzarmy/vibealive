@@ -159,7 +159,7 @@ export function startLegacyMCPServer(port: number): void {
   });
 
   // Error handler
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     console.error(chalk.red('Legacy MCP Server Error:'), err);
     res.status(500).json({
       mcp_version: '1.0',

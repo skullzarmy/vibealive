@@ -40,7 +40,11 @@ export class ConfigLoader {
         ...(fileConfig.excludePatterns || []),
         ...(cliOptions.exclude || []),
       ],
-      includePatterns: [...(fileConfig.includePatterns || []), ...(cliOptions.include || [])],
+      includePatterns: [
+        '**/*.{js,jsx,ts,tsx}',
+        ...(fileConfig.includePatterns || []),
+        ...(cliOptions.include || [])
+      ],
       plugins: cliOptions.plugins || fileConfig.plugins || [],
       confidenceThreshold: cliOptions.confidenceThreshold || fileConfig.confidenceThreshold || 80,
       outputFormats: cliOptions.format || fileConfig.outputFormats || ['json', 'md'],
@@ -58,6 +62,12 @@ export class ConfigLoader {
       'vibealive.config.js',
       'vibealive.config.mjs',
       'vibealive.config.ts',
+      'next-analyzer.config.js',
+      'next-analyzer.config.mjs',
+      'next-analyzer.config.ts',
+      '.next-analyzer.config.js',
+      '.next-analyzer.config.mjs',
+      '.next-analyzer.config.ts',
     ];
 
     for (const configFile of configFiles) {
