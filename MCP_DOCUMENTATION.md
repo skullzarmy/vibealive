@@ -1,212 +1,221 @@
 # VibeAlive MCP Server Documentation
 
-This document provides the technical specification for the VibeAlive Model-Context-Protocol (MCP) server. The server exposes the core analysis engine, allowing Large Language Models (LLMs) and other tools to programmatically interact with the analyzer.
+This document provides the technical specification for the VibeAlive Model Context Protocol (MCP) server. The server now uses the official MCP SDK v1.18.1 and follows the standardized MCP protocol for seamless integration with MCP-compatible clients and LLM applications.
 
-## 1. Server Endpoint
+## Overview
 
-The server exposes a single endpoint that adheres to the MCP v1.0 specification.
+The VibeAlive MCP server exposes Next.js project analysis capabilities through the standardized Model Context Protocol. This enables LLMs and other tools to programmatically analyze Next.js projects to identify unused code, dead components, and optimization opportunities.
 
-- **URL:** `http://localhost:<port>/`
-- **HTTP Method:** `POST`
+**Key Features:**
+- ✅ **Official MCP SDK**: Built with @modelcontextprotocol/sdk v1.18.1
+- ✅ **Multiple Transports**: Supports both stdio and HTTP transports
+- ✅ **Standardized Protocol**: Full MCP compliance for universal compatibility
+- ✅ **Async Job Management**: Long-running analysis with progress tracking
+- ✅ **Rich Tool Set**: Comprehensive analysis tools and resources
 
-All interactions are performed by sending a JSON object to this endpoint with a specified `method` and `params`.
+## Transport Options
 
-For a complete, runnable client example, see the [mcp-client.ts](./examples/mcp-client.ts) file.
+### 1. Stdio Transport (Recommended for CLI)
 
-## 2. API Methods
+For direct integration with MCP clients and command-line tools:
 
-### 2.1. `mcp.analyze`
+```bash
+npx vibealive serve --stdio
+```
+
+### 2. HTTP Transport (For Remote Access)
+
+For web-based clients and remote access:
+
+```bash
+npx vibealive serve --port 8080
+```
+
+The HTTP server provides:
+- **Endpoint**: `http://localhost:8080/mcp`
+- **Session Management**: Automatic session handling
+- **CORS Support**: Configurable for browser clients
+
+## MCP Tools
+
+The server provides the following standardized MCP tools:
+
+### `analyze-project`
 
 Initiates a full, asynchronous analysis of a Next.js project.
 
-**Request:**
+**Parameters:**
+- `projectPath` (string, required): Path to the Next.js project
+- `options` (object, optional):
+  - `exclude` (string[]): Glob patterns to exclude
+  - `include` (string[]): Glob patterns to include  
+  - `confidenceThreshold` (number): Confidence threshold (0-100)
+  - `generateGraph` (boolean): Generate dependency graph
+  - `plugins` (string[]): Additional analysis plugins
+  - `verbose` (boolean): Enable verbose output
 
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.analyze",
-  "params": {
-    "projectPath": "/path/to/your/nextjs-project",
-    "options": {
-      "exclude": ["**/node_modules/**", "**/dist/**"],
-      "confidenceThreshold": 80
+**Returns:**
+Job information with ID for tracking progress.
+
+**Example:**
+```typescript
+await client.callTool({
+  name: 'analyze-project',
+  arguments: {
+    projectPath: '/path/to/nextjs-project',
+    options: {
+      exclude: ['**/node_modules/**'],
+      confidenceThreshold: 80
     }
   }
-}
+});
 ```
 
-**Response (Success):**
+### `get-job-status`
 
-Returns a `jobId` that can be used to track the analysis progress.
+Checks the status of an analysis job.
+
+**Parameters:**
+- `jobId` (string, required): Job ID returned from analyze-project
+
+**Returns:**
+Current job status, progress, and messages.
+
+### `get-analysis-report`
+
+Retrieves the analysis report for a completed job.
+
+**Parameters:**
+- `jobId` (string, required): Job ID of completed analysis
+- `format` (enum, optional): `"summary"` or `"json"` (default: summary)
+
+**Returns:**
+Analysis report in requested format.
+
+### `get-file-details`
+
+Gets detailed analysis for a specific file.
+
+**Parameters:**
+- `jobId` (string, required): Job ID of completed analysis
+- `filePath` (string, required): Path to the file
+
+**Returns:**
+Detailed file analysis including classification, confidence, and usage information.
+
+## MCP Resources
+
+### `server-status`
+
+**URI**: `status://server`
+
+Provides current server status including version, active jobs, and system information.
+
+**Example:**
+```typescript
+const status = await client.readResource({
+  uri: 'status://server'
+});
+```
+
+## Client Integration
+
+### Using the Official MCP SDK
+
+```typescript
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
+const client = new Client({
+  name: 'my-client',
+  version: '1.0.0'
+});
+
+const transport = new StdioClientTransport({
+  command: 'npx',
+  args: ['vibealive', 'serve', '--stdio']
+});
+
+await client.connect(transport);
+
+// Use the client...
+const tools = await client.listTools();
+const result = await client.callTool({
+  name: 'analyze-project',
+  arguments: { projectPath: '/my/project' }
+});
+```
+
+### HTTP Client Example
+
+```typescript
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+
+const transport = new StreamableHTTPClientTransport(
+  new URL('http://localhost:8080/mcp')
+);
+await client.connect(transport);
+```
+
+## Error Handling
+
+The server follows MCP standard error responses:
 
 ```json
 {
-  "mcp_version": "1.0",
-  "result": {
-    "jobId": "a-unique-job-identifier",
-    "status": "queued",
-    "message": "Analysis job has been queued."
-  }
-}
-```
-
-### 2.2. `mcp.status`
-
-Checks the status of a previously initiated analysis job.
-
-**Request:**
-
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.status",
-  "params": {
-    "jobId": "a-unique-job-identifier"
-  }
-}
-```
-
-**Response (Success):**
-
-```json
-{
-  "mcp_version": "1.0",
-  "result": {
-    "jobId": "a-unique-job-identifier",
-    "status": "processing",
-    "progress": 42,
-    "message": "Building dependency graph..."
-  }
-}
-```
-
-### 2.3. `mcp.getReport`
-
-Retrieves the full JSON analysis report for a completed job.
-
-**Request:**
-
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.getReport",
-  "params": {
-    "jobId": "a-unique-job-identifier"
-  }
-}
-```
-
-**Response (Success):**
-
-```json
-{
-  "mcp_version": "1.0",
-  "result": {
-    "metadata": { ... },
-    "files": [ ... ],
-    "apiEndpoints": [ ... ],
-    // ... The full analysis report object
-  }
-}
-```
-
-### 2.4. Discovery & Help Methods
-
-#### `mcp.discover`
-
-Returns a machine-readable description of all available server methods.
-
-**Request:**
-
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.discover"
-}
-```
-
-**Response (Success):**
-
-```json
-{
-  "mcp_version": "1.0",
-  "result": {
-    "name": "vibealive",
-    "description": "A tool for analyzing Next.js projects to find unused code.",
-    "methods": [
-      // ... array of method schema objects
-    ]
-  }
-}
-```
-
-#### `mcp.status` (Server-Level)
-
-Checks the general health of the MCP server.
-
-**Request:**
-
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.status"
-}
-```
-
-**Response (Success):**
-
-```json
-{
-  "mcp_version": "1.0",
-  "result": {
-    "status": "ok"
-  }
-}
-```
-
-#### `mcp.help`
-
-Provides detailed, human-readable help for a specific method.
-
-**Request:**
-
-```json
-{
-  "mcp_version": "1.0",
-  "method": "mcp.help",
-  "params": {
-    "method": "mcp.analyze"
-  }
-}
-```
-
-**Response (Success):**
-
-```json
-{
-  "mcp_version": "1.0",
-  "result": "Method: mcp.analyze\nDescription: Initiates a full, asynchronous analysis...\n..."
-}
-```
-
-## 3. Standardized Error Handling
-
-The server uses a standardized error format to ensure that errors are machine-readable and actionable for an LLM.
-
-**Example Error Response:**
-
-```json
-{
-  "mcp_version": "1.0",
+  "jsonrpc": "2.0",
   "error": {
     "code": -32602,
-    "message": "Invalid parameters for method 'mcp.status'.",
-    "data": {
-      "details": "The 'jobId' parameter is missing or not a valid string.",
-      "expectedFormat": {
-        "jobId": "string"
-      }
-    }
-  }
+    "message": "Invalid parameters",
+    "data": { "details": "Missing required parameter: projectPath" }
+  },
+  "id": null
 }
 ```
+
+## Job Lifecycle
+
+1. **Start Analysis**: Call `analyze-project` tool
+2. **Get Job ID**: Extract job ID from response
+3. **Poll Status**: Use `get-job-status` to monitor progress
+4. **Get Results**: Call `get-analysis-report` when completed
+
+## Migration from Legacy API
+
+The legacy HTTP API endpoints are deprecated. Migration guide:
+
+| Legacy Endpoint | New MCP Tool | Notes |
+|----------------|--------------|-------|
+| `mcp.analyze` | `analyze-project` | Same functionality, standardized parameters |
+| `mcp.status` | `get-job-status` | Requires jobId parameter |
+| `mcp.getReport` | `get-analysis-report` | Added format parameter |
+| `mcp.discover` | `client.listTools()` | Built into MCP protocol |
+| `mcp.help` | Tool descriptions | Automatic via MCP schema |
+
+## Configuration
+
+Server configuration through CLI options:
+
+```bash
+# Stdio mode (for MCP clients)
+npx vibealive serve --stdio
+
+# HTTP mode with custom port
+npx vibealive serve --port 3000
+
+# Legacy mode (backwards compatibility)
+npx vibealive serve --legacy
+```
+
+## Security Considerations
+
+- **Local-First**: Server binds to localhost by default
+- **Session Management**: Secure session handling for HTTP transport
+- **Input Validation**: All parameters validated using Zod schemas
+- **Error Boundary**: Comprehensive error handling and reporting
+
+For production deployments, implement additional security measures including authentication, rate limiting, and network security.
+
+## Examples
+
+See the complete working example at [examples/mcp-client.ts](./examples/mcp-client.ts) for detailed usage patterns and best practices.

@@ -10,7 +10,8 @@ import { ConfigLoader } from './config/config-loader';
 import { ReportGenerator } from './generators/report-generator';
 import { CLIOptions, OutputFormat } from './types';
 import packageJson from '../package.json';
-import { startMCPServer } from './mcp/server';
+import { startMCPServer, startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
+import { startLegacyMCPServer } from './mcp/legacy';
 
 const program = new Command();
 
@@ -74,14 +75,29 @@ program
 program
   .command('serve')
   .description('Start the MCP server to interact with the analysis engine')
-  .option('-p, --port <number>', 'Port to run the server on', '8080')
+  .option('-p, --port <number>', 'Port to run the server on (HTTP mode)', '8080')
+  .option('--stdio', 'Use stdio transport instead of HTTP (for direct MCP client integration)')
+  .option('--legacy', 'Use legacy MCP API (deprecated, for backwards compatibility)')
   .action(async (options: any) => {
     try {
-      const port = parseInt(options.port, 10);
-      if (isNaN(port)) {
-        throw new Error('Port must be a number.');
+      if (options.legacy) {
+        // Use legacy server implementation
+        const port = parseInt(options.port, 10);
+        if (isNaN(port)) {
+          throw new Error('Port must be a number.');
+        }
+        startLegacyMCPServer(port);
+      } else if (options.stdio) {
+        // Use stdio transport for direct MCP client connections
+        await startMCPServerStdio();
+      } else {
+        // Use HTTP transport for remote connections
+        const port = parseInt(options.port, 10);
+        if (isNaN(port)) {
+          throw new Error('Port must be a number.');
+        }
+        startMCPServerHTTP(port);
       }
-      startMCPServer(port);
     } catch (error) {
       console.error(chalk.red('❌ Failed to start MCP server:'), error);
       process.exit(1);

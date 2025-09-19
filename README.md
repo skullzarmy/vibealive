@@ -8,7 +8,7 @@ VibeAlive is a powerful, framework-aware code analysis tool designed specificall
 - **Unused Code Detection:** Builds a complete dependency graph to accurately identify orphaned files and components that are no longer referenced.
 - **API Endpoint Analysis:** Scans your codebase to find unused API endpoints.
 - **Multiple Report Formats:** Generates reports in JSON (for machine consumption), Markdown, and other formats.
-- **Local-First MCP Server:** Includes a built-in MCP-compliant server for programmatic access and integration with LLM agents.
+- **Local-First MCP Server:** Includes a built-in MCP-compliant server using the official SDK v1.18.1 for programmatic access and integration with LLM agents.
 
 ## 🚀 Usage
 
@@ -39,7 +39,7 @@ npx vibealive analyze .
 
 ### Using the MCP Server
 
-For programmatic access or integration with LLM agents, you can start the local MCP server. This provides a powerful, machine-readable interface to the analysis engine.
+For programmatic access or integration with LLM agents, you can start the standardized MCP server. This provides a powerful, machine-readable interface to the analysis engine using the official Model Context Protocol.
 
 ```bash
 npx vibealive serve [options]
@@ -47,11 +47,34 @@ npx vibealive serve [options]
 
 **Options:**
 
-| Option                | Description                    | Default |
-| --------------------- | ------------------------------ | ------- |
-| `-p, --port <number>` | The port to run the server on. | `8080`  |
+| Option                | Description                                                | Default |
+| --------------------- | ---------------------------------------------------------- | ------- |
+| `-p, --port <number>` | The port to run the HTTP server on                        | `8080`  |
+| `--stdio`             | Use stdio transport (for direct MCP client integration)   | false   |
+| `--legacy`            | Use legacy API format (deprecated, for compatibility)     | false   |
 
-For detailed examples of how to interact with the server, see the [MCP Client Example](./examples/mcp-client.ts).
+**Transport Modes:**
+
+1. **HTTP Transport** (default): `npx vibealive serve --port 8080`
+   - Best for web-based clients and remote access
+   - Endpoint: `http://localhost:8080/mcp`
+   - Supports session management and CORS
+
+2. **Stdio Transport**: `npx vibealive serve --stdio`
+   - Best for direct MCP client integration
+   - Uses stdin/stdout for communication
+   - Recommended for CLI tools and local automation
+
+**MCP Tools Available:**
+- `analyze-project`: Start a full Next.js project analysis
+- `get-job-status`: Check analysis progress
+- `get-analysis-report`: Retrieve analysis results (summary or full JSON)
+- `get-file-details`: Get detailed analysis for specific files
+
+**MCP Resources:**
+- `status://server`: Real-time server status and metrics
+
+For detailed API documentation and client examples, see the [MCP Server Documentation](./MCP_DOCUMENTATION.md).
 
 #### 🚨 Security Note
 
@@ -59,7 +82,7 @@ The MCP server is designed for **local use only** and binds to `localhost` by de
 
 If you choose to expose this server externally (e.g., using a tool like `ngrok` or by binding to `0.0.0.0`), you are responsible for implementing your own authentication and security measures. **Do not expose the default server to the public internet.**
 
-For full technical details on the MCP API, including all methods and data models, please see the [MCP Server Documentation](./MCP_DOCUMENTATION.md).
+For full technical details on the MCP API, including all tools, resources, and migration guide from the legacy API, please see the [MCP Server Documentation](./MCP_DOCUMENTATION.md).
 
 ## License
 
