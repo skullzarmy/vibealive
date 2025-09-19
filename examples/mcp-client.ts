@@ -13,9 +13,10 @@
  * 2. Modify the transport below to use HTTP instead of stdio
  */
 
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+// Using require for better compatibility with the MCP SDK
+const { Client } = require('@modelcontextprotocol/sdk/client');
+const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio');
+const { StreamableHTTPClientTransport } = require('@modelcontextprotocol/sdk/client/streamableHttp');
 
 // Choose transport method
 const USE_STDIO = true; // Set to false to use HTTP transport

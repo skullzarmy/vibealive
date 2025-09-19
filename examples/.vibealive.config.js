@@ -1,4 +1,4 @@
-// Sample configuration file for Next.js Analyzer
+// Sample configuration file for VibeAlive
 module.exports = {
   // Files to exclude from analysis
   exclude: [

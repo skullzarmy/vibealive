@@ -1,0 +1,32 @@
+{
+  "servers": {
+    "vibealive-bun": {
+      "type": "stdio",
+      "command": "bunx",
+      "args": [
+        "vibealive",
+        "serve",
+        "--stdio"
+      ]
+    },
+    "vibealive-pnpm": {
+      "type": "stdio", 
+      "command": "pnpx",
+      "args": [
+        "vibealive",
+        "serve",
+        "--stdio"
+      ]
+    },
+    "vibealive-yarn": {
+      "type": "stdio",
+      "command": "yarn",
+      "args": [
+        "dlx",
+        "vibealive",
+        "serve",
+        "--stdio"
+      ]
+    }
+  }
+}

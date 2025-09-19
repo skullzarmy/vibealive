@@ -120,7 +120,41 @@ const status = await client.readResource({
 
 ## Client Integration
 
+### IDE Configuration (Recommended)
+
+For most users, configuring VibeAlive as an MCP server in your IDE is the easiest approach:
+
+**VS Code / Cursor workspace configuration** - Create `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["vibealive", "serve", "--stdio"]
+    }
+  }
+}
+```
+
+**Alternative package managers:**
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio", 
+      "command": "bunx",
+      "args": ["vibealive", "serve", "--stdio"]
+    }
+  }
+}
+```
+
 ### Using the Official MCP SDK
+
+For programmatic integration:
 
 ```typescript
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -194,17 +228,73 @@ The legacy HTTP API endpoints are deprecated. Migration guide:
 
 ## Configuration
 
+### Workspace Configuration (Recommended)
+
+Create a `.vscode/mcp.json` file in your workspace for team-wide MCP server configuration:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["vibealive", "serve", "--stdio"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+**Important**: Avoid hardcoding sensitive information like API keys. Use environment variables:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx", 
+      "args": ["vibealive", "serve", "--stdio"],
+      "env": {
+        "VIBEALIVE_CONFIG": "${workspaceFolder}/.vibealive.config.js"
+      }
+    }
+  }
+}
+```
+
+### CLI Configuration
+
 Server configuration through CLI options:
 
 ```bash
 # Stdio mode (for MCP clients)
 npx vibealive serve --stdio
 
-# HTTP mode with custom port
+# HTTP mode with custom port  
 npx vibealive serve --port 3000
 
 # Legacy mode (backwards compatibility)
 npx vibealive serve --legacy
+```
+
+### Package Manager Support
+
+VibeAlive is available through all major package managers:
+
+```bash
+# npm
+npx vibealive serve --stdio
+
+# pnpm
+pnpx vibealive serve --stdio
+
+# Yarn
+yarn dlx vibealive serve --stdio
+
+# Bun
+bunx vibealive serve --stdio
 ```
 
 ## Security Considerations
