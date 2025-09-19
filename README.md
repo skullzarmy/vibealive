@@ -84,6 +84,160 @@ If you choose to expose this server externally (e.g., using a tool like `ngrok` 
 
 For full technical details on the MCP API, including all tools, resources, and migration guide from the legacy API, please see the [MCP Server Documentation](./MCP_DOCUMENTATION.md).
 
+---
+
+## 🔧 IDE Configuration
+
+### VS Code with GitHub Copilot
+
+To configure VibeAlive as an MCP server for your VS Code workspace:
+
+1. **Create workspace configuration** - Add a `.vscode/mcp.json` file in your workspace folder:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "vibealive",
+        "serve",
+        "--stdio"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+> 💡 **Example files**: See [examples/.vscode-mcp.json](./examples/.vscode-mcp.json) for a ready-to-use configuration file.
+
+2. **Alternative: Global configuration** - Use the MCP: Add Server command from the Command Palette:
+   - Open Command Palette (`Ctrl/Cmd + Shift + P`)
+   - Run `MCP: Add Server`
+   - Choose `stdio` type
+   - Enter command: `npx`
+   - Enter args: `["vibealive", "serve", "--stdio"]`
+   - Select **Workspace Settings** to create the configuration file
+
+3. **HTTP server option** (for remote access):
+
+```json
+{
+  "servers": {
+    "vibealive-http": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp"
+    }
+  }
+}
+```
+
+Then start the HTTP server separately:
+```bash
+npx vibealive serve --port 8080
+```
+
+> 💡 **HTTP Example**: See [examples/.vscode-mcp-http.json](./examples/.vscode-mcp-http.json) for HTTP configuration.
+
+### Cursor IDE
+
+Cursor uses the same MCP configuration format as VS Code. Create `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["vibealive", "serve", "--stdio"]
+    }
+  }
+}
+```
+
+### Other Editors
+
+For any MCP-compatible editor or tool, you can use these configurations:
+
+**Stdio Transport (recommended):**
+- **Command**: `npx`
+- **Args**: `["vibealive", "serve", "--stdio"]`
+- **Type**: `stdio`
+
+**HTTP Transport:**
+- **URL**: `http://localhost:8080/mcp`
+- **Type**: `http`
+- **Start server**: `npx vibealive serve --port 8080`
+
+### Package Manager Support
+
+VibeAlive works with all major Node.js package managers:
+
+```bash
+# npm
+npx vibealive serve --stdio
+
+# Yarn
+yarn dlx vibealive serve --stdio
+
+# pnpm
+pnpx vibealive serve --stdio
+
+# Bun
+bunx vibealive serve --stdio
+```
+
+> 💡 **Package Manager Examples**: See [examples/.vscode-mcp-package-managers.json](./examples/.vscode-mcp-package-managers.json) for configurations using different package managers.
+
+### Environment Variables
+
+You can configure VibeAlive using environment variables in your MCP configuration:
+
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["vibealive", "serve", "--stdio"],
+      "env": {
+        "VIBEALIVE_LOG_LEVEL": "info",
+        "VIBEALIVE_MAX_JOBS": "5"
+      }
+    }
+  }
+}
+```
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **Command not found**: Ensure Node.js and npm are installed
+2. **Permission denied**: Try using `npx` instead of local installation
+3. **Server won't start**: Check if port is already in use (for HTTP mode)
+4. **No response**: Verify the project path is a valid Next.js project
+
+**Debug mode:**
+```json
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": ["vibealive", "serve", "--stdio"],
+      "env": {
+        "DEBUG": "vibealive:*"
+      }
+    }
+  }
+}
+```
+
 ## License
 
 MIT

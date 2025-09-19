@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "vibealive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "vibealive",
+        "serve",
+        "--stdio"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
