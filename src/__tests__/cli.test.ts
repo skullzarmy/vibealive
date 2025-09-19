@@ -4,7 +4,7 @@ import * as path from 'path';
 
 describe('CLI', () => {
   let testProjectCounter = 0;
-  
+
   const getTestProjectPath = () => {
     testProjectCounter++;
     return path.join(__dirname, 'fixtures', `test-cli-project-${testProjectCounter}-${Date.now()}`);
@@ -15,7 +15,7 @@ describe('CLI', () => {
 
   beforeAll(async () => {
     testProjectPath = getTestProjectPath();
-    
+
     // Create test project structure
     await fs.ensureDir(testProjectPath);
     await fs.ensureDir(path.join(testProjectPath, 'app'));
@@ -66,13 +66,12 @@ describe('CLI', () => {
     });
 
     it('should analyze project and output results', () => {
-      const output = execSync(
-        `node ${cliPath} analyze ${testProjectPath} --format json`,
-        { encoding: 'utf8' }
-      );
-      
+      const output = execSync(`node ${cliPath} analyze ${testProjectPath} --format json`, {
+        encoding: 'utf8',
+      });
+
       expect(output).toContain('Analysis complete');
-      
+
       // Check that reports are generated
       expect(output).toContain('Generated reports');
       expect(output).toContain('analysis-report');
@@ -80,19 +79,15 @@ describe('CLI', () => {
 
     it('should handle non-existent project path', () => {
       expect(() => {
-        execSync(
-          `node ${cliPath} analyze /non/existent/path`,
-          { encoding: 'utf8', stdio: 'pipe' }
-        );
+        execSync(`node ${cliPath} analyze /non/existent/path`, { encoding: 'utf8', stdio: 'pipe' });
       }).toThrow();
     });
 
     it('should support different output formats', () => {
-      const mdOutput = execSync(
-        `node ${cliPath} analyze ${testProjectPath} --format md`,
-        { encoding: 'utf8' }
-      );
-      
+      const mdOutput = execSync(`node ${cliPath} analyze ${testProjectPath} --format md`, {
+        encoding: 'utf8',
+      });
+
       expect(mdOutput).toContain('Analysis complete');
       expect(mdOutput).toContain('Generated reports');
       expect(mdOutput).toContain('.md');
@@ -103,7 +98,7 @@ describe('CLI', () => {
         `node ${cliPath} analyze ${testProjectPath} --confidence-threshold 90 --format json`,
         { encoding: 'utf8' }
       );
-      
+
       expect(output).toContain('Analysis complete');
       // The analysis should complete regardless of confidence threshold
     }, 30000);
@@ -113,7 +108,7 @@ describe('CLI', () => {
         `node ${cliPath} analyze ${testProjectPath} --exclude "**/Button.tsx" --format json`,
         { encoding: 'utf8' }
       );
-      
+
       expect(output).toContain('Analysis complete');
       // Button.tsx should be excluded from analysis
     }, 30000);
@@ -122,9 +117,10 @@ describe('CLI', () => {
   describe('serve command', () => {
     it('should display serve help', () => {
       const output = execSync(`node ${cliPath} serve --help`, { encoding: 'utf8' });
-      expect(output).toContain('Start the MCP server');
-      expect(output).toContain('--port');
-      expect(output).toContain('--stdio');
+      expect(output).toContain('Usage: vibealive serve [options]');
+      expect(output).toContain('Start the MCP server to interact with the analysis engine');
+      expect(output).toContain('-p, --port <number>  Port to run the server on (default: "8080")');
+      expect(output).toContain('-h, --help           display help for command');
     });
 
     // Note: We can't easily test the actual server startup in unit tests
@@ -135,10 +131,10 @@ describe('CLI', () => {
   describe('input validation', () => {
     it('should validate project path exists', () => {
       expect(() => {
-        execSync(
-          `node ${cliPath} analyze /definitely/does/not/exist`,
-          { encoding: 'utf8', stdio: 'pipe' }
-        );
+        execSync(`node ${cliPath} analyze /definitely/does/not/exist`, {
+          encoding: 'utf8',
+          stdio: 'pipe',
+        });
       }).toThrow();
     });
 
@@ -146,13 +142,13 @@ describe('CLI', () => {
       // Create a directory without package.json
       const nonNextProjectPath = path.join(__dirname, 'fixtures', 'non-next-project');
       fs.ensureDirSync(nonNextProjectPath);
-      
+
       try {
         expect(() => {
-          execSync(
-            `node ${cliPath} analyze ${nonNextProjectPath}`,
-            { encoding: 'utf8', stdio: 'pipe' }
-          );
+          execSync(`node ${cliPath} analyze ${nonNextProjectPath}`, {
+            encoding: 'utf8',
+            stdio: 'pipe',
+          });
         }).toThrow();
       } finally {
         fs.removeSync(nonNextProjectPath);
@@ -164,17 +160,17 @@ describe('CLI', () => {
         `node ${cliPath} analyze ${testProjectPath} --confidence-threshold 150`,
         { encoding: 'utf8', stdio: 'pipe' }
       );
-      
+
       // The CLI currently doesn't validate the range, but it should complete
       expect(output).toContain('Analysis complete');
     });
 
     it('should handle invalid output format', () => {
       expect(() => {
-        execSync(
-          `node ${cliPath} analyze ${testProjectPath} --format invalid`,
-          { encoding: 'utf8', stdio: 'pipe' }
-        );
+        execSync(`node ${cliPath} analyze ${testProjectPath} --format invalid`, {
+          encoding: 'utf8',
+          stdio: 'pipe',
+        });
       }).toThrow();
     });
   });
@@ -193,11 +189,8 @@ describe('CLI', () => {
       );
 
       try {
-        const output = execSync(
-          `node ${cliPath} analyze ${testProjectPath}`,
-          { encoding: 'utf8' }
-        );
-        
+        const output = execSync(`node ${cliPath} analyze ${testProjectPath}`, { encoding: 'utf8' });
+
         expect(output).toContain('Analysis complete');
       } finally {
         await fs.remove(configPath);
