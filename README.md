@@ -84,6 +84,16 @@ If you choose to expose this server externally (e.g., using a tool like `ngrok` 
 
 For full technical details on the MCP API, including all tools, resources, and migration guide from the legacy API, please see the [MCP Server Documentation](./MCP_DOCUMENTATION.md).
 
+### 🧪 Testing MCP Integration
+
+To validate that the MCP server is working correctly and is compatible with VS Code:
+
+```bash
+npm run validate-mcp
+```
+
+This validation script tests both stdio and HTTP transports to ensure full compatibility with MCP clients.
+
 ---
 
 ## 🔧 IDE Configuration

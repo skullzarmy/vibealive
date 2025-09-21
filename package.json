@@ -17,6 +17,7 @@
     "test:integration": "jest --testNamePattern=\"integration\"",
     "test:mcp": "jest src/__tests__/mcp-server.test.ts",
     "test:cli": "jest src/__tests__/cli.test.ts",
+    "validate-mcp": "node scripts/validate-mcp.js",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",

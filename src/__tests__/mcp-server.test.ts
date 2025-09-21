@@ -1,6 +1,6 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { JobManager } from '../mcp/job-manager';
-import { startMCPServerHTTP } from '../mcp/server';
+// import { McpServer } from '../mcp/server';
+// import { JobManager } from '../mcp/job-manager';
+// import { startMCPServerHTTP } from '../mcp/server';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
