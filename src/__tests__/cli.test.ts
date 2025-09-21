@@ -119,7 +119,8 @@ describe('CLI', () => {
       const output = execSync(`node ${cliPath} serve --help`, { encoding: 'utf8' });
       expect(output).toContain('Usage: vibealive serve [options]');
       expect(output).toContain('Start the MCP server to interact with the analysis engine');
-      expect(output).toContain('-p, --port <number>  Port to run the server on (default: "8080")');
+      expect(output).toContain('-p, --port <number>  Port to run the server on (HTTP mode) (default: "8080")');
+      expect(output).toContain('--stdio              Use stdio transport instead of HTTP');
       expect(output).toContain('-h, --help           display help for command');
     });
 
