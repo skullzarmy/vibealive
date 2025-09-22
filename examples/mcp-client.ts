@@ -28,7 +28,7 @@ async function createClient() {
     version: '1.0.0',
   });
 
-  let transport;
+  let transport: typeof StdioClientTransport | typeof StreamableHTTPClientTransport;
   
   if (USE_STDIO) {
     // Stdio transport for direct connection
@@ -56,7 +56,7 @@ async function main() {
     console.log('\n--- Listing available tools ---');
     const tools = await client.listTools();
     console.log('Available tools:');
-    tools.tools.forEach(tool => {
+    tools.tools.forEach((tool: { name: string; description: string }) => {
       console.log(`- ${tool.name}: ${tool.description}`);
     });
 
@@ -64,7 +64,12 @@ async function main() {
     console.log('\n--- Listing available resources ---');
     const resources = await client.listResources();
     console.log('Available resources:');
-    resources.resources.forEach(resource => {
+    interface Resource {
+      name: string;
+      description: string;
+    }
+
+    resources.resources.forEach((resource: Resource) => {
       console.log(`- ${resource.name}: ${resource.description}`);
     });
 

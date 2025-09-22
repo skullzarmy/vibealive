@@ -8,9 +8,9 @@ import ora from 'ora';
 import { NextJSAnalyzer } from './analyzer';
 import { ConfigLoader } from './config/config-loader';
 import { ReportGenerator } from './generators/report-generator';
-import { CLIOptions, OutputFormat } from './types';
+import type { CLIOptions, OutputFormat } from './types';
 import packageJson from '../package.json';
-import { startMCPServer, startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
+import { startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
 import { startLegacyMCPServer } from './mcp/legacy';
 
 const program = new Command();
