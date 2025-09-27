@@ -43,6 +43,17 @@ See the [docs](./docs/) directory for complete documentation:
 - [MCP Server](./docs/mcp.md) - Integration with IDEs and tools
 - [Build Integration](./docs/build-integration.md) - Automated analysis in CI/CD pipelines
 
+## Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guide](./CONTRIBUTING.md) for details on:
+
+- Development setup and workflow
+- Code style and testing requirements
+- Pull request process and review guidelines
+- Types of contributions we're looking for
+
+Please also review our [Code of Conduct](./CODE_OF_CONDUCT.md) which outlines our community standards and expectations for respectful collaboration.
+
 ## License
 
 MIT
