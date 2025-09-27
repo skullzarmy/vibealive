@@ -21,6 +21,7 @@ import {
 import { FileScanner, ScannedFile } from './scanners/file-scanner';
 import { DependencyAnalyzer } from './analyzers/dependency-analyzer';
 import { APIAnalyzer } from './analyzers/api-analyzer';
+import { NextJSPatternsAnalyzer } from './analyzers/nextjs-patterns-analyzer';
 
 export class NextJSAnalyzer {
   private config: AnalysisConfig;
@@ -55,11 +56,16 @@ export class NextJSAnalyzer {
       const apiAnalyzer = new APIAnalyzer(this.config, this.projectStructure);
       const apiEndpoints = await apiAnalyzer.analyzeAPIs(files);
 
-      // Step 5: Consolidate analysis from the dependency graph (REPLACES UsageAnalyzer)
+      // Step 5: Analyze Next.js patterns and setup
+      console.log('🔧 Analyzing Next.js patterns and setup...');
+      const patternsAnalyzer = new NextJSPatternsAnalyzer(this.config, this.projectStructure);
+      const nextjsAnalysis = await patternsAnalyzer.analyzePatterns();
+
+      // Step 6: Consolidate analysis from the dependency graph (REPLACES UsageAnalyzer)
       console.log('🎯 Consolidating file analysis...');
       const fileAnalyses = this.consolidateFileAnalysis(graph, files);
 
-      // Step 6: Run plugins
+      // Step 7: Run plugins
       console.log('🔧 Running plugins...');
       const pluginResults = await this.runPlugins({
         config: this.config,
@@ -68,7 +74,7 @@ export class NextJSAnalyzer {
         graph,
       });
 
-      // Step 7: Generate summary and recommendations
+      // Step 8: Generate summary and recommendations
       console.log('📊 Generating analysis summary...');
       const summary = this.generateSummary(fileAnalyses, apiEndpoints);
       const recommendations = this.generateRecommendations(
@@ -94,6 +100,7 @@ export class NextJSAnalyzer {
         graph,
         summary,
         recommendations,
+        nextjsAnalysis,
       };
 
       console.log('✅ Analysis complete!');
@@ -163,7 +170,9 @@ export class NextJSAnalyzer {
       if (isAutoInvoked) {
         classification = 'AUTO_INVOKED';
         confidence = 100;
-        reasons = ['File is automatically invoked by Next.js framework (page, layout, loading, error, etc.).'];
+        reasons = [
+          'File is automatically invoked by Next.js framework (page, layout, loading, error, etc.).',
+        ];
       } else if (isOrphan) {
         classification = 'UNUSED';
         confidence = 80;
@@ -202,8 +211,14 @@ export class NextJSAnalyzer {
       throw new Error('Next.js not found in dependencies. Is this a Next.js project?');
     }
 
-    const hasAppDir = await fs.pathExists(path.join(this.config.projectRoot, 'app'));
-    const hasPagesDir = await fs.pathExists(path.join(this.config.projectRoot, 'pages'));
+    // Check for app and pages directories in both root and src/
+    const hasAppDir =
+      (await fs.pathExists(path.join(this.config.projectRoot, 'app'))) ||
+      (await fs.pathExists(path.join(this.config.projectRoot, 'src/app')));
+
+    const hasPagesDir =
+      (await fs.pathExists(path.join(this.config.projectRoot, 'pages'))) ||
+      (await fs.pathExists(path.join(this.config.projectRoot, 'src/pages')));
 
     let routerType: 'app' | 'pages' | 'hybrid';
     if (hasAppDir && hasPagesDir) {
@@ -278,6 +293,7 @@ export class NextJSAnalyzer {
 
     if (routerType === 'app' || routerType === 'hybrid') {
       const appEntryPatterns = [
+        // Check both root app/ and src/app/
         'app/**/page.{js,jsx,ts,tsx}',
         'app/**/layout.{js,jsx,ts,tsx}',
         'app/**/loading.{js,jsx,ts,tsx}',
@@ -296,6 +312,25 @@ export class NextJSAnalyzer {
         'app/**/apple-icon.{js,ts,tsx,png,svg,ico}',
         'app/**/opengraph-image.{js,ts,tsx,png,jpg,jpeg}',
         'app/**/twitter-image.{js,ts,tsx,png,jpg,jpeg}',
+        // src/app patterns
+        'src/app/**/page.{js,jsx,ts,tsx}',
+        'src/app/**/layout.{js,jsx,ts,tsx}',
+        'src/app/**/loading.{js,jsx,ts,tsx}',
+        'src/app/**/error.{js,jsx,ts,tsx}',
+        'src/app/**/not-found.{js,jsx,ts,tsx}',
+        'src/app/**/route.{js,ts}',
+        'src/app/**/template.{js,jsx,ts,tsx}',
+        'src/app/**/default.{js,jsx,ts,tsx}',
+        'src/app/**/global-error.{js,jsx,ts,tsx}',
+        // Special App Router files in src/
+        'src/app/**/sitemap.{js,ts}',
+        'src/app/**/robots.{js,ts}',
+        'src/app/**/manifest.{js,ts}',
+        'src/app/**/favicon.{ico,png,svg}',
+        'src/app/**/icon.{js,ts,tsx,png,svg,ico}',
+        'src/app/**/apple-icon.{js,ts,tsx,png,svg,ico}',
+        'src/app/**/opengraph-image.{js,ts,tsx,png,jpg,jpeg}',
+        'src/app/**/twitter-image.{js,ts,tsx,png,jpg,jpeg}',
       ];
 
       for (const pattern of appEntryPatterns) {
@@ -308,7 +343,13 @@ export class NextJSAnalyzer {
     }
 
     if (routerType === 'pages' || routerType === 'hybrid') {
-      const pagesEntryPatterns = ['pages/**/*.{js,jsx,ts,tsx}', 'pages/api/**/*.{js,ts}'];
+      const pagesEntryPatterns = [
+        // Check both root pages/ and src/pages/
+        'pages/**/*.{js,jsx,ts,tsx}',
+        'pages/api/**/*.{js,ts}',
+        'src/pages/**/*.{js,jsx,ts,tsx}',
+        'src/pages/api/**/*.{js,ts}',
+      ];
 
       for (const pattern of pagesEntryPatterns) {
         const files = await glob(pattern, {
@@ -319,12 +360,18 @@ export class NextJSAnalyzer {
       }
     }
 
-    // Add middleware
+    // Add middleware - check both root and src/
     const middlewareFiles = await glob('middleware.{js,ts}', {
       cwd: this.config.projectRoot,
       absolute: true,
     });
     entryPoints.push(...middlewareFiles);
+
+    const srcMiddlewareFiles = await glob('src/middleware.{js,ts}', {
+      cwd: this.config.projectRoot,
+      absolute: true,
+    });
+    entryPoints.push(...srcMiddlewareFiles);
 
     // Add essential configuration and system files
     const essentialPatterns = [

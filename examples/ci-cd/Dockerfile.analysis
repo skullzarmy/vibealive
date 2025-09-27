@@ -1,0 +1,71 @@
+# Docker-based CI/CD with VibeAlive
+# This can be used with any CI platform that supports Docker
+
+# Multi-stage Dockerfile for VibeAlive analysis
+FROM node:18-alpine AS base
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+FROM base AS analyzer
+# Install VibeAlive globally for analysis
+RUN npm install -g vibealive
+
+# Copy source code
+COPY . .
+
+# Create analysis script
+RUN cat > analyze.sh << 'EOF'
+#!/bin/sh
+set -e
+
+# Configuration from environment variables
+MAX_ISSUES=${VIBEALIVE_MAX_ISSUES:-5}
+CONFIDENCE=${VIBEALIVE_CONFIDENCE:-80}
+FORMAT=${VIBEALIVE_FORMAT:-json,md}
+OUTPUT=${VIBEALIVE_OUTPUT:-./reports}
+FAIL_ON_ISSUES=${VIBEALIVE_FAIL_ON_ISSUES:-true}
+CI_MODE=${VIBEALIVE_CI_MODE:-true}
+
+echo "Running VibeAlive analysis..."
+echo "Max issues allowed: $MAX_ISSUES"
+echo "Confidence threshold: $CONFIDENCE%"
+
+# Build analysis command
+CMD="vibealive analyze ."
+
+if [ "$CI_MODE" = "true" ]; then
+    CMD="$CMD --ci"
+fi
+
+if [ "$FAIL_ON_ISSUES" = "true" ]; then
+    CMD="$CMD --fail-on-issues"
+fi
+
+CMD="$CMD --max-issues $MAX_ISSUES"
+CMD="$CMD --confidence-threshold $CONFIDENCE"
+CMD="$CMD --format $FORMAT"
+CMD="$CMD --output $OUTPUT"
+
+echo "Executing: $CMD"
+eval $CMD
+
+echo "Analysis completed successfully"
+EOF
+
+RUN chmod +x analyze.sh
+
+# Default command
+CMD ["./analyze.sh"]
+
+# Production analysis stage (strict mode)
+FROM analyzer AS production-check
+ENV VIBEALIVE_MAX_ISSUES=0
+ENV VIBEALIVE_CONFIDENCE=95
+ENV VIBEALIVE_FAIL_ON_ISSUES=true
+
+# Development analysis stage (permissive mode)  
+FROM analyzer AS development-check
+ENV VIBEALIVE_MAX_ISSUES=20
+ENV VIBEALIVE_CONFIDENCE=70
+ENV VIBEALIVE_FAIL_ON_ISSUES=false

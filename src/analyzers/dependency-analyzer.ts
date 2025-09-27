@@ -193,6 +193,31 @@ export class DependencyAnalyzer {
           });
         }
 
+        // Service Worker registration: navigator.serviceWorker.register('/sw.js')
+        // This handles both direct calls and awaited calls
+        if (
+          t.isMemberExpression(path.node.callee) &&
+          t.isMemberExpression(path.node.callee.object) &&
+          t.isIdentifier(path.node.callee.object.object, { name: 'navigator' }) &&
+          t.isIdentifier(path.node.callee.object.property, { name: 'serviceWorker' }) &&
+          t.isIdentifier(path.node.callee.property, { name: 'register' }) &&
+          path.node.arguments.length > 0 &&
+          t.isStringLiteral(path.node.arguments[0])
+        ) {
+          const swPath = path.node.arguments[0].value;
+          console.log(`[DEBUG] Found service worker registration: ${swPath}`);
+          // Convert public path to actual file path
+          const actualPath = swPath.startsWith('/') ? swPath.substring(1) : swPath;
+          console.log(`[DEBUG] Converted to: ${actualPath}`);
+
+          imports.push({
+            source: actualPath,
+            imports: [{ name: 'service-worker' }],
+            isDynamic: true,
+            isLazy: false,
+          });
+        }
+
         // React.lazy
         if (
           t.isMemberExpression(path.node.callee) &&
@@ -217,6 +242,53 @@ export class DependencyAnalyzer {
               });
             }
           }
+        }
+      },
+
+      // Also check AwaitExpression to catch awaited service worker registrations
+      AwaitExpression(path) {
+        if (
+          t.isCallExpression(path.node.argument) &&
+          t.isMemberExpression(path.node.argument.callee) &&
+          t.isMemberExpression(path.node.argument.callee.object) &&
+          t.isIdentifier(path.node.argument.callee.object.object, { name: 'navigator' }) &&
+          t.isIdentifier(path.node.argument.callee.object.property, { name: 'serviceWorker' }) &&
+          t.isIdentifier(path.node.argument.callee.property, { name: 'register' }) &&
+          path.node.argument.arguments.length > 0 &&
+          t.isStringLiteral(path.node.argument.arguments[0])
+        ) {
+          const swPath = path.node.argument.arguments[0].value;
+          console.log(`[DEBUG] Found AWAITED service worker registration: ${swPath}`);
+          // Convert public path to actual file path
+          const actualPath = swPath.startsWith('/') ? swPath.substring(1) : swPath;
+          console.log(`[DEBUG] Converted to: ${actualPath}`);
+
+          imports.push({
+            source: actualPath,
+            imports: [{ name: 'service-worker' }],
+            isDynamic: true,
+            isLazy: false,
+          });
+        }
+      },
+
+      NewExpression(path) {
+        // Web Worker constructor: new Worker('/sw.js') or new Worker('./worker.js')
+        if (
+          t.isIdentifier(path.node.callee, { name: 'Worker' }) &&
+          path.node.arguments.length > 0 &&
+          t.isStringLiteral(path.node.arguments[0])
+        ) {
+          const workerPath = path.node.arguments[0].value;
+          // Convert public path to actual file path
+          const actualPath = workerPath.startsWith('/') ? workerPath.substring(1) : workerPath;
+
+          imports.push({
+            source: actualPath,
+            imports: [{ name: 'worker' }],
+            isDynamic: true,
+            isLazy: false,
+          });
         }
       },
     });
@@ -301,7 +373,27 @@ export class DependencyAnalyzer {
   }
 
   private resolveImport(source: string, fromPath: string): string | null {
-    // 1. Handle Aliases by priority (longest alias first)
+    console.log(`[DEBUG] Resolving import: ${source} from ${fromPath}`);
+
+    // 1. Handle public folder paths (starting with /)
+    if (source.startsWith('/')) {
+      const publicPath = path.join(this.config.projectRoot, 'public', source.substring(1));
+      console.log(`[DEBUG] Checking public path: ${publicPath}`);
+      if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) {
+        console.log(`[DEBUG] Found in public: ${publicPath}`);
+        return publicPath;
+      }
+
+      // Also check root level for files like sw.js that might be in public/
+      const rootPath = path.join(this.config.projectRoot, source.substring(1));
+      console.log(`[DEBUG] Checking root path: ${rootPath}`);
+      if (fs.existsSync(rootPath) && fs.statSync(rootPath).isFile()) {
+        console.log(`[DEBUG] Found in root: ${rootPath}`);
+        return rootPath;
+      }
+    }
+
+    // 2. Handle Aliases by priority (longest alias first)
     for (const { alias, paths } of this.pathAliases) {
       if (source.startsWith(alias)) {
         const remainingPath = source.substring(alias.length);
@@ -315,7 +407,7 @@ export class DependencyAnalyzer {
       }
     }
 
-    // 2. Handle Relative Imports
+    // 3. Handle Relative Imports
     if (source.startsWith('./') || source.startsWith('../')) {
       const fromDir = path.dirname(fromPath);
       const resolvedPath = path.resolve(fromDir, source);
@@ -325,7 +417,8 @@ export class DependencyAnalyzer {
       }
     }
 
-    // 3. Not a local file we can track (e.g., 'react', 'next')
+    // 4. Not a local file we can track (e.g., 'react', 'next')
+    console.log(`[DEBUG] Could not resolve: ${source}`);
     return null;
   }
 

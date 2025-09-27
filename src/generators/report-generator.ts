@@ -39,16 +39,12 @@ export class ReportGenerator {
   private async getUniqueFilePath(
     baseName: string,
     extension: string,
-    force: boolean
+    force: boolean // Keep parameter for backward compatibility
   ): Promise<string> {
-    let filePath = path.join(this.outputDir, `${baseName}.${extension}`);
-
-    if (force || !(await fs.pathExists(filePath))) {
-      return filePath;
-    }
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    filePath = path.join(this.outputDir, `${baseName}-${timestamp}.${extension}`);
+    // Always include timestamp for better report tracking and to avoid overwrites
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 19).replace(/[:.]/g, '-'); // YYYY-MM-DDTHH-MM-SS format
+    const filePath = path.join(this.outputDir, `${baseName}-${timestamp}.${extension}`);
 
     return filePath;
   }
@@ -80,6 +76,8 @@ export class ReportGenerator {
 - **Total Files Analyzed**: ${report.metadata.totalFiles}
 - **Total Components**: ${report.metadata.totalComponents}
 - **Total API Endpoints**: ${report.metadata.totalApiEndpoints}
+
+${this.generateNextJSHealthSection(report)}
 
 ## 🎯 Key Findings
 
@@ -155,6 +153,134 @@ ${report.summary.safeDeletions.map((file) => `- \`${file}\``).join('\n')}
 
     await fs.writeFile(filePath, markdown);
     return filePath;
+  }
+
+  private generateNextJSHealthSection(report: AnalysisReport): string {
+    if (!report.nextjsAnalysis) return '';
+
+    const { projectHealth, patterns, packages, setupIssues } = report.nextjsAnalysis;
+
+    let section = `## 🏥 Next.js Project Health Score: ${projectHealth.score}/100
+
+### ✅ Strengths
+${projectHealth.strengths.map((strength) => `- ${strength}`).join('\n')}
+
+### 🔧 Areas for Improvement
+${projectHealth.improvements.map((improvement) => `- ${improvement}`).join('\n')}
+
+`;
+
+    // Advanced Routing Patterns
+    if (patterns.length > 0) {
+      section += `### 🛤️  Advanced Routing Patterns
+
+| Pattern Type | Path | Purpose | Status |
+|--------------|------|---------|--------|
+${patterns
+  .map(
+    (pattern) =>
+      `| ${pattern.type} | \`${pattern.path}\` | ${pattern.purpose} | ${pattern.isValid ? '✅' : '❌'} |`
+  )
+  .join('\n')}
+
+`;
+    }
+
+    // Package Analysis
+    const installedPackages = packages.filter((p) => p.installed);
+    if (installedPackages.length > 0) {
+      section += `### 📦 Next.js Ecosystem Packages
+
+| Package | Version | Setup Status | Purpose |
+|---------|---------|--------------|---------|
+${installedPackages
+  .map(
+    (pkg) =>
+      `| \`${pkg.name}\` | ${pkg.version || 'N/A'} | ${this.getStatusIcon(pkg.setupStatus)} ${pkg.setupStatus} | ${pkg.purpose} |`
+  )
+  .join('\n')}
+
+`;
+    }
+
+    // Setup Issues
+    if (setupIssues.length > 0) {
+      const errorIssues = setupIssues.filter((i) => i.severity === 'error');
+      const warningIssues = setupIssues.filter((i) => i.severity === 'warning');
+      const infoIssues = setupIssues.filter((i) => i.severity === 'info');
+
+      section += `### ⚠️  Setup Issues & Recommendations
+
+`;
+
+      if (errorIssues.length > 0) {
+        section += `#### 🚨 Critical Issues (${errorIssues.length})
+${errorIssues
+  .map(
+    (issue) => `
+**${issue.title}**
+${issue.description}
+
+Recommendations:
+${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
+`
+  )
+  .join('\n')}
+
+`;
+      }
+
+      if (warningIssues.length > 0) {
+        section += `#### ⚠️  Warnings (${warningIssues.length})
+${warningIssues
+  .map(
+    (issue) => `
+**${issue.title}**
+${issue.description}
+
+Recommendations:
+${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
+`
+  )
+  .join('\n')}
+
+`;
+      }
+
+      if (infoIssues.length > 0) {
+        section += `#### ℹ️  Optimization Opportunities (${infoIssues.length})
+${infoIssues
+  .map(
+    (issue) => `
+**${issue.title}**
+${issue.description}
+
+Recommendations:
+${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
+`
+  )
+  .join('\n')}
+
+`;
+      }
+    }
+
+    return section;
+  }
+
+  private getStatusIcon(status: string): string {
+    switch (status) {
+      case 'complete':
+        return '✅';
+      case 'partial':
+        return '⚠️';
+      case 'missing':
+        return '❌';
+      case 'misconfigured':
+        return '🔧';
+      default:
+        return '❓';
+    }
   }
 
   private generateFileTable(files: any[]): string {

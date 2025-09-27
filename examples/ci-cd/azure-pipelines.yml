@@ -1,0 +1,196 @@
+# Azure DevOps Pipeline for VibeAlive Next.js Analysis
+
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+  paths:
+    exclude:
+    - docs/*
+    - README.md
+
+pr:
+  branches:
+    include:
+    - main
+    - develop
+
+schedules:
+- cron: "0 6 * * 1"  # Weekly on Monday at 6 AM UTC
+  displayName: Weekly VibeAlive Analysis
+  branches:
+    include:
+    - main
+
+variables:
+  nodeVersion: '18.x'
+  maxIssues: 5
+  confidenceThreshold: 80
+
+stages:
+- stage: Analysis
+  displayName: 'VibeAlive Analysis'
+  jobs:
+  - job: MainAnalysis
+    displayName: 'Full Project Analysis'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+    
+    - task: Cache@2
+      displayName: 'Cache node_modules'
+      inputs:
+        key: 'npm | "$(Agent.OS)" | package-lock.json'
+        restoreKeys: |
+          npm | "$(Agent.OS)"
+        path: $(npm_config_cache)
+    
+    - script: npm ci
+      displayName: 'Install Dependencies'
+    
+    - script: |
+        npx vibealive analyze . \
+          --ci \
+          --fail-on-issues \
+          --max-issues $(maxIssues) \
+          --confidence-threshold $(confidenceThreshold) \
+          --format json,md \
+          --output $(Agent.TempDirectory)/vibealive-reports
+      displayName: 'Run VibeAlive Analysis'
+      continueOnError: true
+    
+    - task: PublishTestResults@2
+      displayName: 'Publish Analysis Results'
+      condition: always()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(Agent.TempDirectory)/vibealive-reports/*.json'
+        failTaskOnFailedTests: false
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Reports'
+      condition: always()
+      inputs:
+        pathtoPublish: '$(Agent.TempDirectory)/vibealive-reports'
+        artifactName: 'vibealive-analysis'
+
+  - job: FocusedScans
+    displayName: 'Focused Analysis Scans'
+    pool:
+      vmImage: 'ubuntu-latest'
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest'))
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+    
+    - script: npm ci
+      displayName: 'Install Dependencies'
+    
+    - script: npx vibealive theme-scan . --format json --output $(Agent.TempDirectory)/theme-reports
+      displayName: 'Theme Analysis'
+      continueOnError: true
+    
+    - script: npx vibealive seo-scan . --format json --output $(Agent.TempDirectory)/seo-reports
+      displayName: 'SEO Analysis'
+      continueOnError: true
+    
+    - script: npx vibealive perf-scan . --format json --output $(Agent.TempDirectory)/perf-reports
+      displayName: 'Performance Analysis'
+      continueOnError: true
+    
+    - script: npx vibealive a11y-scan . --format json --output $(Agent.TempDirectory)/a11y-reports
+      displayName: 'Accessibility Analysis'
+      continueOnError: true
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Focused Scan Reports'
+      condition: always()
+      inputs:
+        pathtoPublish: '$(Agent.TempDirectory)'
+        artifactName: 'focused-scans'
+
+- stage: ProductionCheck
+  displayName: 'Production Quality Gate'
+  condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  jobs:
+  - job: StrictAnalysis
+    displayName: 'Strict Production Analysis'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+    
+    - script: npm ci
+      displayName: 'Install Dependencies'
+    
+    - script: |
+        npx vibealive analyze . \
+          --ci \
+          --fail-on-issues \
+          --max-issues 0 \
+          --confidence-threshold 95 \
+          --format json
+      displayName: 'Strict Analysis (Zero Tolerance)'
+
+- stage: Reporting
+  displayName: 'Generate Reports'
+  condition: always()
+  dependsOn: Analysis
+  jobs:
+  - job: GenerateReport
+    displayName: 'Consolidated Reporting'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Analysis Artifacts'
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        artifactName: 'vibealive-analysis'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    
+    - script: |
+        # Create HTML reports from markdown if pandoc is available
+        sudo apt-get update && sudo apt-get install -y pandoc || echo "Pandoc not available, skipping HTML generation"
+        
+        cd $(System.ArtifactsDirectory)/vibealive-analysis
+        for md_file in *.md; do
+          if [ -f "$md_file" ] && command -v pandoc >/dev/null 2>&1; then
+            pandoc "$md_file" -o "${md_file%.md}.html"
+          fi
+        done
+        
+        # Create summary file
+        echo "# VibeAlive Analysis Summary" > summary.md
+        echo "Generated on: $(date)" >> summary.md
+        echo "" >> summary.md
+        
+        # Append all markdown reports
+        for md_file in analysis-report-*.md; do
+          if [ -f "$md_file" ]; then
+            cat "$md_file" >> summary.md
+            echo "" >> summary.md
+          fi
+        done
+      displayName: 'Generate Consolidated Report'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Final Reports'
+      inputs:
+        pathtoPublish: '$(System.ArtifactsDirectory)/vibealive-analysis'
+        artifactName: 'final-reports'

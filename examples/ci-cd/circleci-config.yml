@@ -1,0 +1,157 @@
+# CircleCI configuration for VibeAlive Next.js analysis
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+
+parameters:
+  max-issues:
+    type: integer
+    default: 5
+  confidence-threshold:
+    type: integer
+    default: 80
+
+commands:
+  setup-vibealive:
+    description: "Setup VibeAlive analysis environment"
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Verify Next.js project
+          command: |
+            if [ ! -f "package.json" ]; then
+              echo "package.json not found"
+              exit 1
+            fi
+            
+            if ! grep -q "next" package.json; then
+              echo "Next.js not found in dependencies"
+              exit 1
+            fi
+
+jobs:
+  vibealive-analysis:
+    docker:
+      - image: cimg/node:18.17
+    
+    steps:
+      - setup-vibealive
+      
+      - run:
+          name: Run VibeAlive Analysis
+          command: |
+            npx vibealive analyze . \
+              --ci \
+              --fail-on-issues \
+              --max-issues << pipeline.parameters.max-issues >> \
+              --confidence-threshold << pipeline.parameters.confidence-threshold >> \
+              --format json,md \
+              --output ~/vibealive-reports
+      
+      - store_artifacts:
+          path: ~/vibealive-reports
+          destination: vibealive-analysis
+      
+      - store_test_results:
+          path: ~/vibealive-reports
+  
+  focused-scans:
+    docker:
+      - image: cimg/node:18.17
+    
+    steps:
+      - setup-vibealive
+      
+      - run:
+          name: Theme Analysis
+          command: npx vibealive theme-scan . --format json --output ~/theme-reports
+          
+      - run:
+          name: SEO Analysis  
+          command: npx vibealive seo-scan . --format json --output ~/seo-reports
+          
+      - run:
+          name: Performance Analysis
+          command: npx vibealive perf-scan . --format json --output ~/perf-reports
+          
+      - run:
+          name: Accessibility Analysis
+          command: npx vibealive a11y-scan . --format json --output ~/a11y-reports
+      
+      - store_artifacts:
+          path: ~/theme-reports
+          destination: theme-analysis
+      
+      - store_artifacts:
+          path: ~/seo-reports
+          destination: seo-analysis
+      
+      - store_artifacts:
+          path: ~/perf-reports
+          destination: performance-analysis
+          
+      - store_artifacts:
+          path: ~/a11y-reports
+          destination: accessibility-analysis
+  
+  strict-production-check:
+    docker:
+      - image: cimg/node:18.17
+    
+    steps:
+      - setup-vibealive
+      
+      - run:
+          name: Strict Production Analysis
+          command: |
+            npx vibealive analyze . \
+              --ci \
+              --fail-on-issues \
+              --max-issues 0 \
+              --confidence-threshold 95 \
+              --format json
+
+workflows:
+  version: 2
+  
+  # Main workflow for all branches
+  analysis:
+    jobs:
+      - vibealive-analysis:
+          filters:
+            branches:
+              ignore: /^dependabot\/.*/
+      
+      - focused-scans:
+          filters:
+            branches:
+              only: 
+                - main
+                - develop
+  
+  # Strict workflow for production releases
+  production-release:
+    jobs:
+      - strict-production-check:
+          filters:
+            branches:
+              only: 
+                - main
+                - production
+            tags:
+              only: /^v.*/
+  
+  # Scheduled weekly analysis
+  scheduled-analysis:
+    triggers:
+      - schedule:
+          cron: "0 6 * * 1"  # Every Monday at 6 AM UTC
+          filters:
+            branches:
+              only: main
+    jobs:
+      - vibealive-analysis
+      - focused-scans

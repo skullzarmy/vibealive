@@ -1,0 +1,118 @@
+# VibeAlive CLI Documentation
+
+The VibeAlive CLI provides commands for analyzing Next.js projects and managing reports.
+
+## Commands
+
+### `analyze`
+
+Scan your project and generate a comprehensive report.
+
+```bash
+npx vibealive analyze <path-to-project> [options]
+```
+
+**Options:**
+
+| Option                  | Description                                             | Default              |
+| ----------------------- | ------------------------------------------------------- | -------------------- |
+| `--format <formats>`    | Comma-separated list of output formats (json, md, etc.) | `json,md`            |
+| `--output <dir>`        | Directory to save reports in                            | `./analysis-results` |
+| `--exclude <patterns>`  | Comma-separated glob patterns to exclude                | (none)               |
+| `--confidence <number>` | Minimum confidence threshold for findings (0-100)       | `80`                 |
+
+### Focused Analysis Commands
+
+VibeAlive provides specialized analysis commands for specific areas:
+
+```bash
+# Analyze theme configuration and dark mode setup
+npx vibealive theme-scan <path>
+
+# Comprehensive SEO audit
+npx vibealive seo-scan <path>
+
+# Performance analysis
+npx vibealive perf-scan <path>
+
+# Accessibility audit
+npx vibealive a11y-scan <path>
+
+# Advanced Next.js patterns detection
+npx vibealive patterns <path>
+
+# Common package analysis
+npx vibealive packages <path>
+
+# Overall project health score
+npx vibealive health <path>
+```
+
+### `serve`
+
+Start the MCP server for programmatic access.
+
+```bash
+npx vibealive serve [options]
+```
+
+**Options:**
+
+| Option                | Description                                             | Default |
+| --------------------- | ------------------------------------------------------- | ------- |
+| `-p, --port <number>` | HTTP server port                                        | `8080`  |
+| `--stdio`             | Use stdio transport (for direct MCP client integration) | false   |
+| `--legacy`            | Use legacy API format (deprecated, for compatibility)   | false   |
+
+**Transport Modes:**
+
+1. **HTTP Transport** (default): Best for web-based clients and remote access
+2. **Stdio Transport**: Best for direct MCP client integration, recommended for CLI tools
+
+### Testing MCP Integration
+
+To validate MCP server compatibility:
+
+```bash
+npm run validate-mcp
+```
+
+This tests both stdio and HTTP transports for full MCP client compatibility.
+
+## Example Usage
+
+```bash
+# Basic analysis
+npx vibealive analyze .
+
+# Analysis with custom options
+npx vibealive analyze ./my-project --confidence 90 --exclude "**/test/**"
+
+# Start MCP server
+npx vibealive serve --stdio
+npx vibealive serve --port 3000
+
+# Focused scans
+npx vibealive theme-scan .
+npx vibealive health .
+```
+
+## Package Manager Support
+
+VibeAlive works with all major Node.js package managers:
+
+```bash
+# npm
+npx vibealive analyze .
+
+# Yarn
+yarn dlx vibealive analyze .
+
+# pnpm
+pnpx vibealive analyze .
+
+# Bun
+bunx vibealive analyze .
+```
+
+See [overview.md](./overview.md) and [mcp.md](./mcp.md) for more details.

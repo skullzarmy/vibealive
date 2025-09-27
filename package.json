@@ -1,7 +1,7 @@
 {
   "name": "vibealive",
-  "version": "1.2.0",
-  "description": "Universal Next.js code analysis tool to identify unused files, dead code, and redundant API endpoints",
+  "version": "0.4.0",
+  "description": "Universal Next.js code analysis tool to identify unused files, dead code, and redundant API endpoints with advanced pattern detection and project health scoring",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -47,6 +47,7 @@
     "@modelcontextprotocol/sdk": "^1.18.1",
     "chalk": "^5.3.0",
     "commander": "^11.0.0",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "fast-glob": "^3.3.0",
     "fs-extra": "^11.1.0",
@@ -59,6 +60,7 @@
   },
   "devDependencies": {
     "@types/babel__traverse": "^7.20.1",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/fs-extra": "^11.0.1",
     "@types/jest": "^29.5.0",

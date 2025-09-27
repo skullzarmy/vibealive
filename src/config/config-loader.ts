@@ -31,6 +31,7 @@ export class ConfigLoader {
         'dist/**',
         'build/**',
         '.git/**',
+        '.vibealive/**',
         'coverage/**',
         '**/*.test.{js,jsx,ts,tsx}',
         '**/*.spec.{js,jsx,ts,tsx}',
@@ -42,8 +43,13 @@ export class ConfigLoader {
       ],
       includePatterns: [
         '**/*.{js,jsx,ts,tsx}',
+        'public/**/*.js', // Include service workers and other JS files in public
+        'public/**/*.ts', // Include TypeScript files in public
+        '**/sw.js', // Service workers
+        '**/worker.js', // Web workers
+        '**/worker.*.js', // Patterned workers
         ...(fileConfig.includePatterns || []),
-        ...(cliOptions.include || [])
+        ...(cliOptions.include || []),
       ],
       plugins: cliOptions.plugins || fileConfig.plugins || [],
       confidenceThreshold: cliOptions.confidenceThreshold || fileConfig.confidenceThreshold || 80,
@@ -55,20 +61,7 @@ export class ConfigLoader {
   }
 
   private static async findConfigFile(projectRoot: string): Promise<string | null> {
-    const configFiles = [
-      '.vibealive.config.js',
-      '.vibealive.config.mjs',
-      '.vibealive.config.ts',
-      'vibealive.config.js',
-      'vibealive.config.mjs',
-      'vibealive.config.ts',
-      'next-analyzer.config.js',
-      'next-analyzer.config.mjs',
-      'next-analyzer.config.ts',
-      '.next-analyzer.config.js',
-      '.next-analyzer.config.mjs',
-      '.next-analyzer.config.ts',
-    ];
+    const configFiles = ['.vibealive/config.js', '.vibealive/config.mjs', '.vibealive/config.ts'];
 
     for (const configFile of configFiles) {
       const filePath = path.join(projectRoot, configFile);
@@ -121,8 +114,15 @@ export class ConfigLoader {
       throw new Error('Next.js not found in dependencies. Is this a Next.js project?');
     }
 
-    const hasAppDir = await fs.pathExists(path.join(projectRoot, 'app'));
-    const hasPagesDir = await fs.pathExists(path.join(projectRoot, 'pages'));
+    // Check for app and pages directories in both root and src/
+    const hasAppDir =
+      (await fs.pathExists(path.join(projectRoot, 'app'))) ||
+      (await fs.pathExists(path.join(projectRoot, 'src/app')));
+
+    const hasPagesDir =
+      (await fs.pathExists(path.join(projectRoot, 'pages'))) ||
+      (await fs.pathExists(path.join(projectRoot, 'src/pages')));
+
     const hasTypeScript = await fs.pathExists(path.join(projectRoot, 'tsconfig.json'));
 
     let routerType: 'app' | 'pages' | 'hybrid';
@@ -158,7 +158,7 @@ export class ConfigLoader {
   }
 
   public static generateSampleConfig(): string {
-    return `// .vibealive.config.js
+    return `// .vibealive/config.js
 module.exports = {
   // Files to exclude from analysis
   exclude: [

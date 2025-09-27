@@ -1,0 +1,163 @@
+// Jenkins Pipeline for VibeAlive Next.js Analysis
+pipeline {
+    agent any
+    
+    environment {
+        NODE_VERSION = '18'
+        VIBEALIVE_MAX_ISSUES = '5'
+        VIBEALIVE_CONFIDENCE = '80'
+    }
+    
+    parameters {
+        choice(
+            name: 'ANALYSIS_MODE',
+            choices: ['standard', 'strict', 'permissive'],
+            description: 'Analysis strictness level'
+        )
+        booleanParam(
+            name: 'FAIL_ON_ISSUES',
+            defaultValue: true,
+            description: 'Fail build if issues are found'
+        )
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Setup') {
+            steps {
+                // Install Node.js
+                sh """
+                    curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
+                    sudo apt-get install -y nodejs
+                """
+                
+                // Install dependencies
+                sh 'npm ci'
+            }
+        }
+        
+        stage('VibeAlive Analysis') {
+            parallel {
+                stage('Full Analysis') {
+                    steps {
+                        script {
+                            def maxIssues = params.ANALYSIS_MODE == 'strict' ? '0' : 
+                                          params.ANALYSIS_MODE == 'permissive' ? '20' : '5'
+                            def confidence = params.ANALYSIS_MODE == 'strict' ? '95' :
+                                           params.ANALYSIS_MODE == 'permissive' ? '70' : '80'
+                            
+                            sh """
+                                npx vibealive analyze . \
+                                  --ci \
+                                  ${params.FAIL_ON_ISSUES ? '--fail-on-issues' : ''} \
+                                  --max-issues ${maxIssues} \
+                                  --confidence-threshold ${confidence} \
+                                  --format json,md \
+                                  --output ./vibealive-reports
+                            """
+                        }
+                    }
+                }
+                
+                stage('Theme Analysis') {
+                    when {
+                        anyOf {
+                            changeset '**/tailwind.config.*'
+                            changeset '**/globals.css'
+                            changeset '**/layout.*'
+                        }
+                    }
+                    steps {
+                        sh 'npx vibealive theme-scan . --format json --output ./theme-reports'
+                    }
+                }
+                
+                stage('SEO Analysis') {
+                    when {
+                        anyOf {
+                            changeset '**/metadata.*'
+                            changeset '**/sitemap.*'
+                            changeset '**/robots.*'
+                        }
+                    }
+                    steps {
+                        sh 'npx vibealive seo-scan . --format json --output ./seo-reports'
+                    }
+                }
+            }
+        }
+        
+        stage('Process Results') {
+            steps {
+                // Archive reports
+                archiveArtifacts artifacts: 'vibealive-reports/**/*', fingerprint: true
+                
+                // Parse JSON reports for trending
+                script {
+                    if (fileExists('vibealive-reports')) {
+                        def reportFiles = findFiles(glob: 'vibealive-reports/*.json')
+                        reportFiles.each { file ->
+                            def report = readJSON file: file.path
+                            
+                            // Record metrics for trending
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'vibealive-reports',
+                                reportFiles: '*.md',
+                                reportName: 'VibeAlive Analysis Report'
+                            ])
+                            
+                            // Set build description with summary
+                            currentBuild.description = "Issues: ${report.summary?.unusedFiles ?: 0} unused, ${report.summary?.deadCode ?: 0} dead code"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean workspace
+            cleanWs()
+        }
+        
+        success {
+            // Send notification on success
+            script {
+                if (env.BRANCH_NAME == 'main') {
+                    slackSend(
+                        channel: '#dev-notifications',
+                        color: 'good',
+                        message: "✅ VibeAlive analysis passed for ${env.JOB_NAME} - ${env.BUILD_NUMBER}"
+                    )
+                }
+            }
+        }
+        
+        failure {
+            // Send notification on failure
+            slackSend(
+                channel: '#dev-notifications',
+                color: 'danger',
+                message: "❌ VibeAlive analysis failed for ${env.JOB_NAME} - ${env.BUILD_NUMBER}\nCheck: ${env.BUILD_URL}"
+            )
+        }
+        
+        unstable {
+            // Send notification on warnings
+            slackSend(
+                channel: '#dev-notifications',
+                color: 'warning',
+                message: "⚠️ VibeAlive analysis found issues in ${env.JOB_NAME} - ${env.BUILD_NUMBER}\nReport: ${env.BUILD_URL}VibeAlive_Analysis_Report"
+            )
+        }
+    }
+}

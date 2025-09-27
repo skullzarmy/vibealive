@@ -13,6 +13,39 @@ export interface AnalysisConfig {
   generateGraph?: boolean;
 }
 
+export interface NextJSPattern {
+  type:
+    | 'route-group'
+    | 'private-folder'
+    | 'intercepting-route'
+    | 'parallel-route'
+    | 'dynamic-route';
+  path: string;
+  purpose: string;
+  isValid: boolean;
+  recommendations?: string[];
+}
+
+export interface CommonPackage {
+  name: string;
+  installed: boolean;
+  version?: string;
+  purpose: string;
+  setupStatus: 'complete' | 'partial' | 'missing' | 'misconfigured';
+  recommendations: string[];
+  criticalFiles: string[];
+  foundFiles: string[];
+}
+
+export interface SetupIssue {
+  category: 'seo' | 'performance' | 'accessibility' | 'security' | 'structure';
+  severity: 'error' | 'warning' | 'info';
+  title: string;
+  description: string;
+  files: string[];
+  recommendations: string[];
+}
+
 export type FileClassification = 'ACTIVE' | 'UNUSED' | 'DEAD_CODE' | 'AUTO_INVOKED' | 'UNTRACKED';
 
 export type ComponentType =
@@ -101,13 +134,32 @@ export interface ProjectStructure {
 }
 
 export interface AnalysisReport {
-  metadata: ReportMetadata;
+  metadata: {
+    projectRoot: string;
+    nextVersion: string | null;
+    routerType: 'app' | 'pages' | 'hybrid';
+    analysisDate: string;
+    totalFiles: number;
+    totalComponents: number;
+    totalApiEndpoints: number;
+    configHash: string;
+  };
   files: FileAnalysis[];
   components: ComponentNode[];
   apiEndpoints: APIEndpoint[];
   graph: ComponentGraph;
   summary: AnalysisSummary;
   recommendations: Recommendation[];
+  nextjsAnalysis?: {
+    patterns: NextJSPattern[];
+    packages: CommonPackage[];
+    setupIssues: SetupIssue[];
+    projectHealth: {
+      score: number;
+      strengths: string[];
+      improvements: string[];
+    };
+  };
 }
 
 export interface ReportMetadata {
@@ -173,7 +225,7 @@ export interface AnalysisContext {
 export interface PluginResult {
   findings: FileAnalysis[];
   recommendations: Recommendation[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD';

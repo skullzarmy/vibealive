@@ -1,0 +1,36 @@
+# Package.json scripts for VibeAlive integration
+
+# Add these scripts to your package.json for easy build integration
+
+{
+  "scripts": {
+    "analyze": "vibealive analyze .",
+    "analyze:ci": "vibealive analyze . --ci --fail-on-issues --max-issues 5",
+    "analyze:strict": "vibealive analyze . --ci --fail-on-issues --max-issues 0 --confidence-threshold 95",
+    "analyze:dev": "vibealive analyze . --max-issues 20 --confidence-threshold 70",
+    
+    "scan:theme": "vibealive theme-scan .",
+    "scan:seo": "vibealive seo-scan .",
+    "scan:perf": "vibealive perf-scan .",
+    "scan:a11y": "vibealive a11y-scan .",
+    "scan:all": "npm run scan:theme && npm run scan:seo && npm run scan:perf && npm run scan:a11y",
+    
+    "health": "vibealive health .",
+    "patterns": "vibealive patterns .",
+    "packages": "vibealive packages .",
+    
+    "build:analyze": "npm run build && npm run analyze:ci",
+    "prebuild": "vibealive analyze . --ci --fail-on-issues --max-issues 5 --silent",
+    "postbuild": "vibealive analyze . --format json --output ./dist/analysis-reports",
+    
+    "lint:vibealive": "vibealive analyze . --ci --max-issues 0",
+    "test:vibealive": "vibealive analyze . --dry-run"
+  },
+  
+  "husky": {
+    "hooks": {
+      "pre-commit": "vibealive analyze . --ci --fail-on-issues --max-issues 10 --silent",
+      "pre-push": "vibealive analyze . --ci --fail-on-issues --max-issues 5"
+    }
+  }
+}
