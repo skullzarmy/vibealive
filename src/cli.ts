@@ -347,6 +347,88 @@ program
     }
   });
 
+program
+  .command('bundle-scan')
+  .argument('[project-path]', 'Path to the Next.js project (defaults to current directory)', '.')
+  .option('-f, --format <formats>', 'Output formats (json,md,tsv,csv)', parseFormats, [
+    'json',
+    'md',
+  ])
+  .option('-o, --output <dir>', 'Output directory for reports', './.vibealive/analysis-results')
+  .option('--build-path <path>', 'Path to build output directory')
+  .description('Analyze bundle size impact of unused code with real webpack stats')
+  .action(
+    async (
+      projectPath: string,
+      options: { format: OutputFormat[]; output: string; buildPath?: string }
+    ) => {
+      const startTime = Date.now();
+      try {
+        console.log('📦 Analyzing bundle size impact...');
+        await runBundleAnalysis(projectPath, options);
+        console.log('📦 Bundle analysis completed in', Date.now() - startTime, 'ms');
+      } catch (error) {
+        console.error(chalk.red('❌ Bundle analysis failed:'), error);
+        process.exit(1);
+      }
+    }
+  );
+
+async function runBundleAnalysis(
+  projectPath: string,
+  options: { format: OutputFormat[]; output: string; buildPath?: string }
+): Promise<void> {
+  const absoluteProjectPath = path.resolve(projectPath);
+  await validateNextProject(absoluteProjectPath);
+
+  const cliOptions: CLIOptions = {
+    format: options.format,
+    output: options.output,
+    exclude: [],
+    include: [],
+    plugins: [],
+    confidenceThreshold: 80,
+    generateGraph: false,
+    verbose: false,
+    dryRun: false,
+  };
+
+  const config = await ConfigLoader.loadConfig(absoluteProjectPath, cliOptions);
+  const analyzer = new NextJSAnalyzer(config);
+  const report = await analyzer.analyze();
+
+  // Generate reports with focus on bundle analysis
+  const outputDir = path.resolve(options.output);
+  const reportGenerator = new ReportGenerator(outputDir);
+  const generatedFiles = await reportGenerator.generateReports(report, options.format);
+
+  console.log(chalk.green('\n📊 Bundle Analysis Summary:'));
+  if (report.bundleAnalysis) {
+    const bundle = report.bundleAnalysis;
+    console.log(`• Total bundle size: ${chalk.bold(formatBytes(bundle.totalBundleSize))}`);
+    console.log(`• Unused code size: ${chalk.bold(formatBytes(bundle.unusedCodeSize))}`);
+    console.log(
+      `• Potential savings: ${chalk.bold(formatBytes(bundle.potentialSavings.bytes))} (${bundle.potentialSavings.percentage.toFixed(1)}%)`
+    );
+    console.log(`• Gzipped savings: ${chalk.bold(formatBytes(bundle.potentialSavings.gzipped))}`);
+
+    if (bundle.recommendations.length > 0) {
+      console.log(chalk.yellow('\n💡 Top Bundle Recommendations:'));
+      bundle.recommendations.slice(0, 3).forEach((rec, index) => {
+        console.log(`${index + 1}. ${rec.description} (Save ${formatBytes(rec.potentialSaving)})`);
+      });
+    }
+  } else {
+    console.log(chalk.yellow('⚠️  Bundle analysis not available - webpack stats not found'));
+    console.log('💡 Run `npm run build` first to generate webpack stats for accurate analysis');
+  }
+
+  console.log(chalk.blue('\n📁 Generated reports:'));
+  generatedFiles.forEach((file) => {
+    console.log(`• ${path.relative(process.cwd(), file)}`);
+  });
+}
+
 async function runFocusedAnalysis(
   projectPath: string,
   options: { format: OutputFormat[] },

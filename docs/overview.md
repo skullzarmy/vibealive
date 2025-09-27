@@ -6,6 +6,7 @@ VibeAlive is a powerful, framework-aware code analysis tool designed specificall
 
 - **Framework-Aware Analysis:** Intelligently detects your Next.js version and routing patterns (App Router, Pages Router, or hybrid)
 - **Unused Code Detection:** Builds a complete dependency graph to accurately identify orphaned files and components that are no longer referenced
+- **Real Bundle Size Analysis:** Integrates with webpack stats to calculate exact bundle size impact and potential savings from removing unused code
 - **API Endpoint Analysis:** Scans your codebase to find unused API endpoints
 - **Multiple Report Formats:** Generates reports in JSON (for machine consumption), Markdown, and other formats
 - **Local-First MCP Server:** Includes a built-in MCP-compliant server using the official SDK v1.18.1 for programmatic access and integration with LLM agents
@@ -25,6 +26,7 @@ Analysis reports include:
 
 - **Unused Files:** Files not referenced anywhere in your codebase
 - **Dead Components:** React components that are no longer used
+- **Bundle Size Impact:** Real webpack stats analysis showing exact bytes that can be saved
 - **Unused API Routes:** API endpoints with no incoming requests detected
 - **Dependency Graph:** Visual representation of file dependencies
 - **Framework Patterns:** Advanced Next.js routing and architectural patterns in use

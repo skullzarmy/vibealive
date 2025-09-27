@@ -6,6 +6,7 @@ Welcome to the VibeAlive documentation. VibeAlive is a framework-aware code anal
 
 - [Overview](./overview.md) - Features, capabilities, and what VibeAlive can do
 - [CLI Usage](./cli.md) - Command-line interface and analysis commands
+- [Bundle Analysis](./bundle-analysis.md) - Real bundle size impact analysis and optimization
 - [MCP Server & Integration](./mcp.md) - IDE integration and programmatic access
 - [Build Integration & CI/CD](./build-integration.md) - Automated analysis in build pipelines
 - [Webpack Plugin](./webpack-plugin.md) - Build-time analysis integration

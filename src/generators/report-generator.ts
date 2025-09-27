@@ -91,6 +91,8 @@ ${this.generateNextJSHealthSection(report)}
 ### Redundant APIs
 - **Count**: ${report.summary.redundantApis}
 
+${this.generateBundleAnalysisSection(report)}
+
 ## 🗂️ File Analysis
 
 ### Unused Files (${report.files.filter((f) => f.classification === 'UNUSED').length})
@@ -281,6 +283,53 @@ ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
       default:
         return '❓';
     }
+  }
+
+  private generateBundleAnalysisSection(report: AnalysisReport): string {
+    if (!report.bundleAnalysis) {
+      return '';
+    }
+
+    const bundle = report.bundleAnalysis;
+
+    return `## 📦 Bundle Size Analysis
+
+### Current Bundle Impact
+- **Total Bundle Size**: ${this.formatBytes(bundle.totalBundleSize)}
+- **Gzipped Size**: ${this.formatBytes(bundle.gzippedSize)}
+- **Unused Code Size**: ${this.formatBytes(bundle.unusedCodeSize)} (${bundle.potentialSavings.percentage.toFixed(1)}% of total)
+
+### Potential Savings
+- **Raw Size Reduction**: ${this.formatBytes(bundle.potentialSavings.bytes)}
+- **Gzipped Reduction**: ${this.formatBytes(bundle.potentialSavings.gzipped)}
+- **Bundle Size Improvement**: ${bundle.potentialSavings.percentage.toFixed(1)}%
+
+### Top Unused Modules by Size
+${
+  bundle.moduleBreakdown
+    .filter((m) => m.isUnused)
+    .sort((a, b) => b.size - a.size)
+    .slice(0, 10)
+    .map(
+      (m) =>
+        `- \`${path.relative(process.cwd(), m.path)}\` - ${this.formatBytes(m.size)} (${this.formatBytes(m.gzippedSize)} gzipped)`
+    )
+    .join('\n') || '_No unused modules detected._'
+}
+
+### Bundle Optimization Recommendations
+${
+  bundle.recommendations.length > 0
+    ? bundle.recommendations
+        .map(
+          (rec) =>
+            `- **${rec.type}**: ${rec.description}\n  - Potential saving: ${this.formatBytes(rec.potentialSaving)}\n  - Action: ${rec.action}`
+        )
+        .join('\n\n')
+    : '_No specific bundle recommendations available._'
+}
+
+`;
   }
 
   private generateFileTable(files: any[]): string {

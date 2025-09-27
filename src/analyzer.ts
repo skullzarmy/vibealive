@@ -17,11 +17,13 @@ import {
   Recommendation,
   AnalysisPlugin,
   AnalysisContext,
+  BundleAnalysis,
 } from './types';
 import { FileScanner, ScannedFile } from './scanners/file-scanner';
 import { DependencyAnalyzer } from './analyzers/dependency-analyzer';
 import { APIAnalyzer } from './analyzers/api-analyzer';
 import { NextJSPatternsAnalyzer } from './analyzers/nextjs-patterns-analyzer';
+import { BundleAnalyzer } from './analyzers/bundle-analyzer';
 
 export class NextJSAnalyzer {
   private config: AnalysisConfig;
@@ -74,7 +76,11 @@ export class NextJSAnalyzer {
         graph,
       });
 
-      // Step 8: Generate summary and recommendations
+      // Step 8: Analyze bundle impact
+      console.log('📦 Analyzing bundle size impact...');
+      const bundleAnalysis = await this.analyzeBundleImpact(fileAnalyses);
+
+      // Step 9: Generate summary and recommendations
       console.log('📊 Generating analysis summary...');
       const summary = this.generateSummary(fileAnalyses, apiEndpoints);
       const recommendations = this.generateRecommendations(
@@ -101,6 +107,7 @@ export class NextJSAnalyzer {
         summary,
         recommendations,
         nextjsAnalysis,
+        bundleAnalysis: bundleAnalysis || undefined,
       };
 
       console.log('✅ Analysis complete!');
@@ -121,6 +128,20 @@ export class NextJSAnalyzer {
   public getDependencyInfo(filePath: string): any | null {
     // This is a placeholder implementation.
     return null; // Placeholder
+  }
+
+  private async analyzeBundleImpact(fileAnalyses: FileAnalysis[]): Promise<BundleAnalysis | null> {
+    try {
+      const bundleAnalyzer = new BundleAnalyzer(this.config);
+      const unusedFiles = fileAnalyses
+        .filter((f) => f.classification === 'UNUSED')
+        .map((f) => f.path);
+
+      return await bundleAnalyzer.analyzeBundleImpact(unusedFiles);
+    } catch (error) {
+      console.warn('Bundle analysis failed:', error);
+      return null;
+    }
   }
 
   private resolveImport(source: string, fromPath: string): string | null {

@@ -160,6 +160,7 @@ export interface AnalysisReport {
       improvements: string[];
     };
   };
+  bundleAnalysis?: BundleAnalysis;
 }
 
 export interface ReportMetadata {
@@ -251,4 +252,37 @@ export interface Job {
   message: string;
   result?: AnalysisReport;
   error?: string;
+}
+
+export interface BundleAnalysis {
+  totalBundleSize: number;
+  gzippedSize: number;
+  parsedSize: number;
+  unusedCodeSize: number;
+  unusedCodeGzipped: number;
+  potentialSavings: {
+    bytes: number;
+    gzipped: number;
+    percentage: number;
+  };
+  moduleBreakdown: ModuleSize[];
+  recommendations: BundleSizeRecommendation[];
+}
+
+export interface ModuleSize {
+  name: string;
+  size: number;
+  gzippedSize: number;
+  parsedSize: number;
+  isUnused: boolean;
+  path: string;
+}
+
+export interface BundleSizeRecommendation {
+  type: 'REMOVE_UNUSED' | 'CODE_SPLIT' | 'OPTIMIZE_IMPORT';
+  module: string;
+  currentSize: number;
+  potentialSaving: number;
+  description: string;
+  action: string;
 }

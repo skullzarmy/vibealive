@@ -21,6 +21,37 @@ npx vibealive analyze <path-to-project> [options]
 | `--exclude <patterns>`  | Comma-separated glob patterns to exclude                | (none)               |
 | `--confidence <number>` | Minimum confidence threshold for findings (0-100)       | `80`                 |
 
+### `bundle-scan`
+
+Analyze the real bundle size impact of unused code with webpack stats integration.
+
+```bash
+npx vibealive bundle-scan <path-to-project> [options]
+```
+
+**Options:**
+
+| Option                | Description                                             | Default              |
+| --------------------- | ------------------------------------------------------- | -------------------- |
+| `--format <formats>`  | Comma-separated list of output formats (json, md, etc.) | `json,md`            |
+| `--output <dir>`      | Directory to save reports in                            | `./analysis-results` |
+| `--build-path <path>` | Path to build output directory with webpack stats       | (auto-detected)      |
+
+**Example:**
+
+```bash
+# Basic bundle analysis
+npx vibealive bundle-scan .
+
+# With custom build path
+npx vibealive bundle-scan . --build-path ./dist
+
+# Generate detailed reports
+npx vibealive bundle-scan . --format json,md --output ./bundle-reports
+```
+
+This command provides real bundle size impact analysis by parsing webpack stats to show exact bytes that can be saved by removing unused code. See [bundle-analysis.md](./bundle-analysis.md) for detailed documentation.
+
 ### Focused Analysis Commands
 
 VibeAlive provides specialized analysis commands for specific areas:
