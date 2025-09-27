@@ -1,6 +1,4 @@
-# VibeAlive
-
-![johnny vibealive](media/johnny-vibealive-sm.png)
+# ![johnny vibealive](media/johnny-vibealive-sm.png)
 
 A framework-aware code analysis tool for Next.js projects. Identify unused files, dead code, and redundant API endpoints to keep your codebase clean and maintainable.
 
