@@ -9,16 +9,48 @@ import ora from 'ora';
 import { NextJSAnalyzer } from './analyzer';
 import { ConfigLoader } from './config/config-loader';
 import { ReportGenerator } from './generators/report-generator';
-import type { CLIOptions, OutputFormat, AnalysisConfig } from './types';
+import type { CLIOptions, OutputFormat, AnalysisConfig, Locale } from './types';
 import packageJson from '../package.json';
 import { startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
+import { t, tSync, setLocale, preloadLocale, getLocale, isLocaleSupported } from './i18n/utils/i18n';
 
 const program = new Command();
+
+// Initialize English locale by default
+(async () => {
+  try {
+    await preloadLocale('en');
+  } catch (error) {
+    // Continue even if locale loading fails
+  }
+})();
 
 program
   .name('vibealive')
   .description('Universal Next.js code analysis tool')
-  .version(packageJson.version);
+  .version(packageJson.version)
+  .option('--locale <locale>', 'Set the display language (en, es, fr, de, ja, zh, pt, ru, it, ko)', 'en');
+
+// Initialize locale from CLI option
+program.hook('preAction', async (thisCommand) => {
+  const opts = thisCommand.opts();
+  if (opts.locale && isLocaleSupported(opts.locale)) {
+    setLocale(opts.locale as Locale);
+    try {
+      await preloadLocale(opts.locale as Locale);
+    } catch (error) {
+      // Fallback to English if locale loading fails
+      await preloadLocale('en');
+    }
+  } else {
+    // Default to English and preload it
+    try {
+      await preloadLocale('en');
+    } catch (error) {
+      // If even English fails, continue without localization
+    }
+  }
+});
 
 program
   .command('analyze')
@@ -61,7 +93,7 @@ program
     try {
       await runAnalysis(projectPath, options);
     } catch (error) {
-      console.error(chalk.red('❌ Analysis failed:'), error);
+      console.error(chalk.red(tSync('cli.errors.analysisError')), error);
       process.exit(1);
     }
   });
@@ -74,7 +106,7 @@ program
     try {
       await initConfig(options);
     } catch (error) {
-      console.error(chalk.red('❌ Failed to initialize config:'), error);
+      console.error(chalk.red(tSync('cli.errors.configInitFailed')), error);
       process.exit(1);
     }
   });
@@ -87,7 +119,7 @@ program
     try {
       await cleanupConfig(options);
     } catch (error) {
-      console.error(chalk.red('❌ Failed to cleanup:'), error);
+      console.error(chalk.red(tSync('cli.errors.cleanupFailed')), error);
       process.exit(1);
     }
   });
@@ -106,12 +138,12 @@ program
         // Use HTTP transport for remote connections
         const port = parseInt(options.port, 10);
         if (isNaN(port)) {
-          throw new Error('Port must be a number.');
+          throw new Error(tSync('cli.validation.portMustBeNumber'));
         }
         startMCPServerHTTP(port);
       }
     } catch (error) {
-      console.error(chalk.red('❌ Failed to start MCP server:'), error);
+      console.error(chalk.red(tSync('cli.errors.mcpServerStartFailed')), error);
       process.exit(1);
     }
   });
@@ -128,7 +160,7 @@ program
     try {
       await runFileCheck(projectPath, filePath, options);
     } catch (error) {
-      console.error(chalk.red('❌ File check failed:'), error);
+      console.error(chalk.red(tSync('cli.errors.fileCheckFailed')), error);
       process.exit(1);
     }
   });
@@ -157,7 +189,7 @@ program
     try {
       await runDirectoryScan(projectPath, directoryPath, options);
     } catch (error) {
-      console.error(chalk.red('❌ Directory scan failed:'), error);
+      console.error(chalk.red(tSync('cli.errors.directoryScanFailed')), error);
       process.exit(1);
     }
   });
@@ -177,7 +209,7 @@ program
     try {
       await runComponentScan(projectPath, componentPath, options);
     } catch (error) {
-      console.error(chalk.red('❌ Component scan failed:'), error);
+      console.error(chalk.red(tSync('cli.errors.componentScanFailed')), error);
       process.exit(1);
     }
   });
@@ -195,7 +227,7 @@ program
     try {
       await runApiScan(projectPath, options);
     } catch (error) {
-      console.error(chalk.red('❌ API scan failed:'), error);
+      console.error(chalk.red(tSync('cli.errors.apiScanFailed')), error);
       process.exit(1);
     }
   });
@@ -528,7 +560,7 @@ async function runAnalysis(projectPath: string, options: any): Promise<void> {
     return;
   }
 
-  const spinner = ora('Initializing analysis...').start();
+  const spinner = ora(tSync('cli.analysis.initializingAnalysis')).start();
 
   try {
     // Load configuration
@@ -558,16 +590,16 @@ async function runAnalysis(projectPath: string, options: any): Promise<void> {
     const analyzer = new NextJSAnalyzer(config);
     const report = await analyzer.analyze();
 
-    spinner.succeed('Analysis completed!');
+    spinner.succeed(tSync('cli.analysis.analysisCompleted'));
 
     // Generate reports
-    const reportSpinner = ora('Generating reports...').start();
+    const reportSpinner = ora(tSync('cli.analysis.generatingReports')).start();
 
     const outputDir = path.resolve(options.output);
-    const reportGenerator = new ReportGenerator(outputDir);
+    const reportGenerator = new ReportGenerator(outputDir, config.locale || getLocale());
     const generatedFiles = await reportGenerator.generateReports(report, options.format);
 
-    reportSpinner.succeed('Reports generated!');
+    reportSpinner.succeed(tSync('cli.analysis.reportsGenerated'));
 
     // Display summary
     console.log(chalk.green('\n📊 Analysis Summary:'));
@@ -937,21 +969,21 @@ async function runApiScan(projectPath: string, options: any): Promise<void> {
     const generatedFiles = await reportGenerator.generateReports(apiReport, options.format);
 
     // Display summary
-    console.log(chalk.green('\n🚀 API Routes Analysis'));
-    console.log(`• Total API files: ${chalk.bold(apiFiles.length)}`);
+    console.log(chalk.green(tSync('cli.apiScan.title')));
+    console.log(tSync('cli.apiScan.totalApiFiles', { count: chalk.bold(apiFiles.length) }));
     console.log(
-      `• Unused routes: ${chalk.bold(apiFiles.filter((f) => f.classification === 'UNUSED').length)}`
+      tSync('cli.apiScan.unusedRoutes', { count: chalk.bold(apiFiles.filter((f) => f.classification === 'UNUSED').length) })
     );
     console.log(
-      `• Active routes: ${chalk.bold(apiFiles.filter((f) => f.classification === 'ACTIVE').length)}`
+      tSync('cli.apiScan.activeRoutes', { count: chalk.bold(apiFiles.filter((f) => f.classification === 'ACTIVE').length) })
     );
 
-    console.log(chalk.blue('\n📁 Generated reports:'));
+    console.log(chalk.blue(tSync('cli.apiScan.generatedReports')));
     generatedFiles.forEach((file) => {
-      console.log(`• ${path.relative(process.cwd(), file)}`);
+      console.log(tSync('cli.apiScan.reportFile', { file: path.relative(process.cwd(), file) }));
     });
   } catch (error) {
-    spinner.fail('API scan failed');
+    spinner.fail(tSync('cli.apiScan.failed'));
     throw error;
   }
 }
@@ -1057,10 +1089,10 @@ async function initConfig(options: any): Promise<void> {
   }
 
   // Final summary
-  console.log(chalk.green('\n🎉 Initialization complete!'));
-  console.log(chalk.blue('Next steps:'));
-  console.log(chalk.gray('   1. Review and customize .vibealive/config.js if needed'));
-  console.log(chalk.gray('   2. Run `vibealive analyze` to start analyzing your project'));
+  console.log(chalk.green(tSync('cli.config.initComplete')));
+  console.log(chalk.blue(tSync('cli.config.nextSteps')));
+  console.log(chalk.gray(tSync('cli.config.reviewConfig')));
+  console.log(chalk.gray(tSync('cli.config.runAnalyze')));
 }
 
 async function cleanupConfig(options: any): Promise<void> {
@@ -1070,7 +1102,7 @@ async function cleanupConfig(options: any): Promise<void> {
   const vibeAliveDirExists = await fs.pathExists(vibeAliveDir);
 
   if (!vibeAliveDirExists) {
-    console.log(chalk.blue('🔍 No VibeAlive files found to cleanup.'));
+    console.log(chalk.blue(tSync('cli.config.noFilesToCleanup')));
     return;
   }
 
@@ -1116,7 +1148,7 @@ async function cleanupConfig(options: any): Promise<void> {
     );
 
     if (shouldProceed.toLowerCase() !== 'y' && shouldProceed.toLowerCase() !== 'yes') {
-      console.log(chalk.blue('ℹ️  Cleanup cancelled.'));
+      console.log(chalk.blue(tSync('cli.config.cleanupCancelled')));
       return;
     }
   }
@@ -1124,11 +1156,11 @@ async function cleanupConfig(options: any): Promise<void> {
   // Perform cleanup
   try {
     await fs.remove(vibeAliveDir);
-    console.log(chalk.green('✅ Removed .vibealive directory'));
-    console.log(chalk.green('\n🎉 Cleanup completed!'));
+    console.log(chalk.green(tSync('cli.config.removedVibeAliveDir')));
+    console.log(chalk.green(tSync('cli.config.cleanupComplete')));
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.log(chalk.red(`❌ Failed to remove .vibealive directory: ${errorMessage}`));
+    console.log(chalk.red(tSync('cli.errors.cleanupDirFailed', { error: errorMessage })));
   }
 }
 
@@ -1138,7 +1170,10 @@ function parseFormats(value: string): OutputFormat[] {
 
   for (const format of formats) {
     if (!validFormats.includes(format)) {
-      throw new Error(`Invalid format: ${format}. Valid formats: ${validFormats.join(', ')}`);
+      throw new Error(tSync('cli.validation.invalidFormats', { 
+        formats: format, 
+        validFormats: validFormats.join(', ') 
+      }));
     }
   }
 

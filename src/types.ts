@@ -1,4 +1,5 @@
 export type OutputFormat = 'json' | 'md' | 'tsv' | 'csv';
+export type Locale = 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh' | 'pt' | 'ru' | 'it' | 'ko';
 
 export interface AnalysisConfig {
   projectRoot: string;
@@ -11,6 +12,7 @@ export interface AnalysisConfig {
   confidenceThreshold?: number;
   outputFormats?: OutputFormat[];
   generateGraph?: boolean;
+  locale?: Locale;
 }
 
 export interface NextJSPattern {

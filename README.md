@@ -10,6 +10,10 @@ A framework-aware code analysis tool for Next.js projects. Identify unused files
 # Analyze your Next.js project
 npx vibealive analyze .
 
+# Use in different languages
+npx vibealive analyze . --locale es  # Spanish
+npx vibealive analyze . --locale fr  # French
+
 # Start MCP server for IDE integration
 npx vibealive serve --stdio
 ```
@@ -23,6 +27,7 @@ npx vibealive serve --stdio
 - **MCP Integration**: Built-in Model Context Protocol server for IDE/LLM integration
 - **Build Integration**: Webpack plugin and CI/CD pipeline support
 - **Focused Scans**: Specialized analysis for themes, SEO, performance, and accessibility
+- **Internationalization**: Multi-language support with community translations
 
 ## Installation
 
@@ -42,6 +47,7 @@ See the [docs](./docs/) directory for complete documentation:
 - [CLI Usage](./docs/cli.md) - Command-line interface
 - [MCP Server](./docs/mcp.md) - Integration with IDEs and tools
 - [Build Integration](./docs/build-integration.md) - Automated analysis in CI/CD pipelines
+- [Internationalization](./docs/i18n.md) - Multi-language support and translation guide
 
 ## Contributing
 

@@ -1,0 +1,163 @@
+{
+  "cli": {
+    "analysis": {
+      "starting": "🔍 Analizando proyecto Next.js...",
+      "detectingStructure": "📁 Detectando estructura del proyecto...",
+      "generatingHealthReport": "🏠 Generando reporte de salud del proyecto...",
+      "scanningFiles": "📋 Escaneando archivos...",
+      "analyzingBundles": "📦 Analizando información del bundle...",
+      "buildingDependencyGraph": "🕸️  Construyendo gráfico de dependencias...",
+      "generatingRecommendations": "💡 Generando recomendaciones...",
+      "complete": "✅ ¡Análisis completo!",
+      "failed": "❌ Error en el análisis:",
+      "initializingAnalysis": "- Inicializando análisis...",
+      "analysisCompleted": "✔ ¡Análisis completado!",
+      "generatingReports": "- Generando reportes...",
+      "reportsGenerated": "✔ ¡Reportes generados!"
+    },
+    "apiScan": {
+      "title": "🚀 Análisis de Rutas API",
+      "totalApiFiles": "• Total de archivos API: {{count}}",
+      "unusedRoutes": "• Rutas no utilizadas: {{count}}",
+      "activeRoutes": "• Rutas activas: {{count}}",
+      "generatedReports": "📁 Reportes generados:",
+      "reportFile": "• {{file}}",
+      "failed": "Error en escaneo de API"
+    },
+    "config": {
+      "initComplete": "🎉 ¡Inicialización completa!",
+      "nextSteps": "Próximos pasos:",
+      "reviewConfig": "   1. Revisar y personalizar .vibealive/config.js si es necesario",
+      "runAnalyze": "   2. Ejecutar `vibealive analyze` para comenzar a analizar tu proyecto",
+      "cleanupCancelled": "ℹ️  Limpieza cancelada.",
+      "cleanupComplete": "🎉 ¡Limpieza completada!",
+      "removedVibeAliveDir": "✅ Directorio .vibealive eliminado",
+      "noFilesToCleanup": "🔍 No se encontraron archivos de VibeAlive para limpiar.",
+      "cleanupConfirmation": "⚠️  Esto eliminará permanentemente todo el directorio .vibealive y {{count}} reporte(s). ¿Continuar? [y/N]: "
+    },
+    "errors": {
+      "analysisError": "❌ Error en el análisis:",
+      "configInitFailed": "❌ Error al inicializar configuración:",
+      "cleanupFailed": "❌ Error en la limpieza:",
+      "fileCheckFailed": "❌ Error al verificar archivo:",
+      "directoryScanFailed": "❌ Error al escanear directorio:",
+      "componentScanFailed": "❌ Error al escanear componente:",
+      "apiScanFailed": "❌ Error al escanear API:",
+      "mcpServerStartFailed": "❌ Error al iniciar servidor MCP:",
+      "cleanupDirFailed": "❌ Error al eliminar directorio .vibealive: {{error}}"
+    },
+    "validation": {
+      "unsupportedFormat": "Formato no soportado: {{format}}",
+      "invalidFormats": "Formato inválido: {{formats}}. Formatos válidos: {{validFormats}}",
+      "portMustBeNumber": "El puerto debe ser un número."
+    }
+  },
+  "reports": {
+    "markdown": {
+      "title": "# Reporte de Análisis de Código Next.js",
+      "executiveSummary": "## 📊 Resumen Ejecutivo",
+      "project": "- **Proyecto**: {{project}}",
+      "nextVersion": "- **Versión de Next.js**: {{version}}",
+      "routerType": "- **Tipo de Router**: {{routerType}}",
+      "analysisDate": "- **Fecha de Análisis**: {{date}}",
+      "analysisTime": "- **Hora de Análisis**: {{time}}",
+      "totalFiles": "- **Total de Archivos Analizados**: {{count}}",
+      "totalComponents": "- **Total de Componentes**: {{count}}",
+      "totalApiEndpoints": "- **Total de Endpoints API**: {{count}}",
+      "keyFindings": "## 🎯 Hallazgos Clave",
+      "unusedFiles": "### Archivos No Utilizados",
+      "unusedFilesCount": "- **Cantidad**: {{count}}",
+      "potentialSavings": "- **Ahorro Potencial en Tamaño de Bundle**: {{size}}",
+      "deadCode": "### Código Muerto",
+      "deadCodeCount": "- **Cantidad**: {{count}}",
+      "redundantApis": "### APIs Redundantes",
+      "redundantApisCount": "- **Cantidad**: {{count}}",
+      "fileAnalysis": "## 🗂️ Análisis de Archivos",
+      "unusedFilesSection": "### Archivos No Utilizados ({{count}})",
+      "deadCodeSection": "### Código Muerto ({{count}})",
+      "apiAnalysis": "## 🔌 Análisis de API",
+      "unusedApisSection": "### APIs No Utilizadas ({{count}})",
+      "recommendations": "## 💡 Recomendaciones",
+      "dependencyGraph": "## 🏗️ Gráfico de Dependencias",
+      "entryPoints": "### Puntos de Entrada",
+      "orphanedComponents": "### Componentes Huérfanos ({{count}})",
+      "circularDependencies": "### Dependencias Circulares ({{count}})",
+      "cycle": "#### Ciclo {{index}}",
+      "safeDeletions": "## 📈 Eliminaciones Seguras",
+      "safeDeletionsDescription": "Los siguientes archivos pueden eliminarse de forma segura con alta confianza:",
+      "generatedBy": "*Reporte generado por Next.js Analyzer el {{date}}*"
+    },
+    "health": {
+      "title": "## 🏥 Puntuación de Salud del Proyecto Next.js: {{score}}/100",
+      "strengths": "### ✅ Fortalezas",
+      "improvements": "### 🔧 Áreas de Mejora",
+      "routingPatterns": "### 🛤️  Patrones de Enrutamiento Avanzados",
+      "ecosystemPackages": "### 📦 Paquetes del Ecosistema Next.js",
+      "setupIssues": "### ⚠️  Problemas de Configuración y Recomendaciones",
+      "criticalIssues": "#### 🚨 Problemas Críticos ({{count}})",
+      "warnings": "#### ⚠️  Advertencias ({{count}})",
+      "optimizationOpportunities": "#### ℹ️  Oportunidades de Optimización ({{count}})",
+      "recommendations": "Recomendaciones:"
+    },
+    "bundle": {
+      "title": "## 📦 Análisis del Tamaño del Bundle",
+      "currentImpact": "### Impacto Actual del Bundle",
+      "totalBundleSize": "- **Tamaño Total del Bundle**: {{size}}",
+      "gzippedSize": "- **Tamaño Comprimido**: {{size}}",
+      "unusedCodeSize": "- **Tamaño de Código No Utilizado**: {{size}} ({{percentage}}% del total)",
+      "potentialSavings": "### Ahorros Potenciales",
+      "rawSizeReduction": "- **Reducción de Tamaño Bruto**: {{size}}",
+      "gzippedReduction": "- **Reducción Comprimida**: {{size}}",
+      "bundleSizeImprovement": "- **Mejora del Tamaño del Bundle**: {{percentage}}%",
+      "topUnusedModules": "### Principales Módulos No Utilizados por Tamaño",
+      "noUnusedModules": "_No se detectaron módulos no utilizados._",
+      "optimizationRecommendations": "### Recomendaciones de Optimización del Bundle",
+      "noRecommendations": "_No hay recomendaciones específicas del bundle disponibles._"
+    },
+    "tables": {
+      "fileTableHeaders": "| Archivo | Tipo | Confianza | Razones |",
+      "fileTableSeparator": "|---------|------|-----------|---------|",
+      "apiTableHeaders": "| Ruta API | Métodos | Archivo | Confianza | Razones |",
+      "apiTableSeparator": "|----------|---------|---------|-----------|---------|",
+      "routingPatternHeaders": "| Tipo de Patrón | Ruta | Propósito | Estado |",
+      "routingPatternSeparator": "|----------------|------|-----------|--------|",
+      "packageHeaders": "| Paquete | Versión | Estado de Configuración | Propósito |",
+      "packageSeparator": "|---------|---------|-------------------------|-----------|",
+      "noFilesFound": "_No se encontraron archivos en esta categoría._",
+      "noApisFound": "_No se encontraron APIs en esta categoría._"
+    },
+    "csv": {
+      "headers": {
+        "type": "Tipo",
+        "path": "Ruta",
+        "usageCount": "Contador de Uso",
+        "classification": "Clasificación",
+        "confidence": "Confianza",
+        "reasons": "Razones"
+      }
+    }
+  },
+  "status": {
+    "complete": "✅",
+    "partial": "⚠️",
+    "missing": "❌",
+    "misconfigured": "🔧",
+    "unknown": "❓",
+    "valid": "✅",
+    "invalid": "❌"
+  },
+  "mcp": {
+    "server": {
+      "starting": "🚀 Iniciando Servidor MCP HTTP con estándares v2025-03-26...",
+      "running": "✅ Servidor MCP ejecutándose en http://localhost:{{port}}",
+      "modernEndpoint": "🔗 Endpoint moderno: http://localhost:{{port}}/mcp",
+      "legacyEndpoint": "🔗 Endpoint legacy: http://localhost:{{port}}/sse",
+      "protocol": "📋 Protocolo: v2025-03-26 con compatibilidad hacia atrás",
+      "security": "🛡️  Seguridad: {{status}}",
+      "cors": "🌐 CORS: Habilitado para clientes de navegador",
+      "clientConnecting": "📡 Cliente SSE legacy conectando (deprecado)",
+      "startingStdio": "🚀 Iniciando Servidor MCP con transporte stdio...",
+      "readyStdio": "✅ Servidor MCP listo en transporte stdio"
+    }
+  }
+}
