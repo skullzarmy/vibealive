@@ -8,7 +8,7 @@
     "vibealive": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/i18n/locales dist/i18n/",
     "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",

@@ -48,7 +48,7 @@
     },
     "validation": {
       "unsupportedFormat": "Unsupported format: {{format}}",
-      "invalidFormats": "Invalid output formats: {{formats}}. Supported: json, md, tsv, csv",
+      "invalidFormats": "Invalid format: {{formats}}. Valid formats: {{validFormats}}",
       "portMustBeNumber": "Port must be a number."
     }
   },
