@@ -1,9 +1,28 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { AnalysisReport, OutputFormat } from '../types';
+import { AnalysisReport, OutputFormat, Locale } from '../types';
+import { t, tSync, setLocale, preloadLocale } from '../i18n/utils/i18n';
 
 export class ReportGenerator {
-  constructor(private outputDir: string) {}
+  private locale: Locale = 'en';
+
+  constructor(private outputDir: string, locale?: Locale) {
+    if (locale) {
+      this.locale = locale;
+      setLocale(locale);
+    }
+    // Preload the locale for synchronous access
+    this.initializeLocale();
+  }
+
+  private async initializeLocale(): Promise<void> {
+    try {
+      await preloadLocale(this.locale);
+    } catch (error) {
+      // Fallback to English if locale loading fails
+      await preloadLocale('en');
+    }
+  }
 
   public async generateReports(
     report: AnalysisReport,
@@ -32,7 +51,7 @@ export class ReportGenerator {
       case 'csv':
         return this.generateCSVReport(report);
       default:
-        throw new Error(`Unsupported format: ${format}`);
+        throw new Error(tSync('cli.validation.unsupportedFormat', { format }));
     }
   }
 
@@ -64,52 +83,52 @@ export class ReportGenerator {
   ): Promise<string> {
     const filePath = await this.getUniqueFilePath('analysis-report', 'md', force);
 
-    const markdown = `# Next.js Code Analysis Report
+    const markdown = `${tSync('reports.markdown.title')}
 
-## 📊 Executive Summary
+${tSync('reports.markdown.executiveSummary')}
 
-- **Project**: ${report.metadata.projectRoot}
-- **Next.js Version**: ${report.metadata.nextVersion}
-- **Router Type**: ${report.metadata.routerType}
-- **Analysis Date**: ${new Date(report.metadata.analysisDate).toLocaleDateString()}
-- **Analysis Time**: ${new Date(report.metadata.analysisDate).toLocaleTimeString()}
-- **Total Files Analyzed**: ${report.metadata.totalFiles}
-- **Total Components**: ${report.metadata.totalComponents}
-- **Total API Endpoints**: ${report.metadata.totalApiEndpoints}
+${tSync('reports.markdown.project', { project: report.metadata.projectRoot })}
+${tSync('reports.markdown.nextVersion', { version: report.metadata.nextVersion || 'N/A' })}
+${tSync('reports.markdown.routerType', { routerType: report.metadata.routerType })}
+${tSync('reports.markdown.analysisDate', { date: new Date(report.metadata.analysisDate).toLocaleDateString() })}
+${tSync('reports.markdown.analysisTime', { time: new Date(report.metadata.analysisDate).toLocaleTimeString() })}
+${tSync('reports.markdown.totalFiles', { count: report.metadata.totalFiles })}
+${tSync('reports.markdown.totalComponents', { count: report.metadata.totalComponents })}
+${tSync('reports.markdown.totalApiEndpoints', { count: report.metadata.totalApiEndpoints })}
 
 ${this.generateNextJSHealthSection(report)}
 
-## 🎯 Key Findings
+${tSync('reports.markdown.keyFindings')}
 
-### Unused Files
-- **Count**: ${report.summary.unusedFiles}
-- **Potential Bundle Size Savings**: ${this.formatBytes(report.summary.potentialSavings.estimatedBundleSize)}
+${tSync('reports.markdown.unusedFiles')}
+${tSync('reports.markdown.unusedFilesCount', { count: report.summary.unusedFiles })}
+${tSync('reports.markdown.potentialSavings', { size: this.formatBytes(report.summary.potentialSavings.estimatedBundleSize) })}
 
-### Dead Code
-- **Count**: ${report.summary.deadCode}
+${tSync('reports.markdown.deadCode')}
+${tSync('reports.markdown.deadCodeCount', { count: report.summary.deadCode })}
 
-### Redundant APIs
-- **Count**: ${report.summary.redundantApis}
+${tSync('reports.markdown.redundantApis')}
+${tSync('reports.markdown.redundantApisCount', { count: report.summary.redundantApis })}
 
 ${this.generateBundleAnalysisSection(report)}
 
-## 🗂️ File Analysis
+${tSync('reports.markdown.fileAnalysis')}
 
-### Unused Files (${report.files.filter((f) => f.classification === 'UNUSED').length})
+${tSync('reports.markdown.unusedFilesSection', { count: report.files.filter((f) => f.classification === 'UNUSED').length })}
 
 ${this.generateFileTable(report.files.filter((f) => f.classification === 'UNUSED'))}
 
-### Dead Code (${report.files.filter((f) => f.classification === 'DEAD_CODE').length})
+${tSync('reports.markdown.deadCodeSection', { count: report.files.filter((f) => f.classification === 'DEAD_CODE').length })}
 
 ${this.generateFileTable(report.files.filter((f) => f.classification === 'DEAD_CODE'))}
 
-## 🔌 API Analysis
+${tSync('reports.markdown.apiAnalysis')}
 
-### Unused APIs (${report.apiEndpoints.filter((api) => api.classification === 'UNUSED').length})
+${tSync('reports.markdown.unusedApisSection', { count: report.apiEndpoints.filter((api) => api.classification === 'UNUSED').length })}
 
 ${this.generateAPITable(report.apiEndpoints.filter((api) => api.classification === 'UNUSED'))}
 
-## 💡 Recommendations
+${tSync('reports.markdown.recommendations')}
 
 ${report.recommendations
   .map(
@@ -124,33 +143,33 @@ ${rec.actions.map((action) => `  - \`${action}\``).join('\n')}
   )
   .join('\n')}
 
-## 🏗️ Dependency Graph
+${tSync('reports.markdown.dependencyGraph')}
 
-### Entry Points
+${tSync('reports.markdown.entryPoints')}
 ${report.graph.entryPoints.map((ep) => `- ${ep.name} (${ep.path})`).join('\n')}
 
-### Orphaned Components (${report.graph.orphans.length})
+${tSync('reports.markdown.orphanedComponents', { count: report.graph.orphans.length })}
 ${report.graph.orphans.map((orphan) => `- ${orphan.name} (${orphan.path})`).join('\n')}
 
-### Circular Dependencies (${report.graph.cycles.length})
+${tSync('reports.markdown.circularDependencies', { count: report.graph.cycles.length })}
 ${report.graph.cycles
   .map(
     (cycle, index) =>
-      `#### Cycle ${index + 1}
+      `${tSync('reports.markdown.cycle', { index: index + 1 })}
 ${cycle.map((node) => `- ${node.name}`).join(' → ')} → ${cycle[0].name}
 `
   )
   .join('\n')}
 
-## 📈 Safe Deletions
+${tSync('reports.markdown.safeDeletions')}
 
-The following files can be safely deleted with high confidence:
+${tSync('reports.markdown.safeDeletionsDescription')}
 
 ${report.summary.safeDeletions.map((file) => `- \`${file}\``).join('\n')}
 
 ---
 
-*Report generated by Next.js Analyzer on ${new Date().toLocaleString()}*
+${tSync('reports.markdown.generatedBy', { date: new Date().toLocaleString() })}
 `;
 
     await fs.writeFile(filePath, markdown);
@@ -162,26 +181,26 @@ ${report.summary.safeDeletions.map((file) => `- \`${file}\``).join('\n')}
 
     const { projectHealth, patterns, packages, setupIssues } = report.nextjsAnalysis;
 
-    let section = `## 🏥 Next.js Project Health Score: ${projectHealth.score}/100
+    let section = `${tSync('reports.health.title', { score: projectHealth.score })}
 
-### ✅ Strengths
+${tSync('reports.health.strengths')}
 ${projectHealth.strengths.map((strength) => `- ${strength}`).join('\n')}
 
-### 🔧 Areas for Improvement
+${tSync('reports.health.improvements')}
 ${projectHealth.improvements.map((improvement) => `- ${improvement}`).join('\n')}
 
 `;
 
     // Advanced Routing Patterns
     if (patterns.length > 0) {
-      section += `### 🛤️  Advanced Routing Patterns
+      section += `${tSync('reports.health.routingPatterns')}
 
-| Pattern Type | Path | Purpose | Status |
-|--------------|------|---------|--------|
+${tSync('reports.tables.routingPatternHeaders')}
+${tSync('reports.tables.routingPatternSeparator')}
 ${patterns
   .map(
     (pattern) =>
-      `| ${pattern.type} | \`${pattern.path}\` | ${pattern.purpose} | ${pattern.isValid ? '✅' : '❌'} |`
+      `| ${pattern.type} | \`${pattern.path}\` | ${pattern.purpose} | ${pattern.isValid ? tSync('status.valid') : tSync('status.invalid')} |`
   )
   .join('\n')}
 
@@ -191,10 +210,10 @@ ${patterns
     // Package Analysis
     const installedPackages = packages.filter((p) => p.installed);
     if (installedPackages.length > 0) {
-      section += `### 📦 Next.js Ecosystem Packages
+      section += `${tSync('reports.health.ecosystemPackages')}
 
-| Package | Version | Setup Status | Purpose |
-|---------|---------|--------------|---------|
+${tSync('reports.tables.packageHeaders')}
+${tSync('reports.tables.packageSeparator')}
 ${installedPackages
   .map(
     (pkg) =>
@@ -211,19 +230,19 @@ ${installedPackages
       const warningIssues = setupIssues.filter((i) => i.severity === 'warning');
       const infoIssues = setupIssues.filter((i) => i.severity === 'info');
 
-      section += `### ⚠️  Setup Issues & Recommendations
+      section += `${tSync('reports.health.setupIssues')}
 
 `;
 
       if (errorIssues.length > 0) {
-        section += `#### 🚨 Critical Issues (${errorIssues.length})
+        section += `${tSync('reports.health.criticalIssues', { count: errorIssues.length })}
 ${errorIssues
   .map(
     (issue) => `
 **${issue.title}**
 ${issue.description}
 
-Recommendations:
+${tSync('reports.health.recommendations')}
 ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
 `
   )
@@ -233,14 +252,14 @@ ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
       }
 
       if (warningIssues.length > 0) {
-        section += `#### ⚠️  Warnings (${warningIssues.length})
+        section += `${tSync('reports.health.warnings', { count: warningIssues.length })}
 ${warningIssues
   .map(
     (issue) => `
 **${issue.title}**
 ${issue.description}
 
-Recommendations:
+${tSync('reports.health.recommendations')}
 ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
 `
   )
@@ -250,14 +269,14 @@ ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
       }
 
       if (infoIssues.length > 0) {
-        section += `#### ℹ️  Optimization Opportunities (${infoIssues.length})
+        section += `${tSync('reports.health.optimizationOpportunities', { count: infoIssues.length })}
 ${infoIssues
   .map(
     (issue) => `
 **${issue.title}**
 ${issue.description}
 
-Recommendations:
+${tSync('reports.health.recommendations')}
 ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
 `
   )
@@ -273,15 +292,15 @@ ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
   private getStatusIcon(status: string): string {
     switch (status) {
       case 'complete':
-        return '✅';
+        return tSync('status.complete');
       case 'partial':
-        return '⚠️';
+        return tSync('status.partial');
       case 'missing':
-        return '❌';
+        return tSync('status.missing');
       case 'misconfigured':
-        return '🔧';
+        return tSync('status.misconfigured');
       default:
-        return '❓';
+        return tSync('status.unknown');
     }
   }
 
@@ -292,19 +311,22 @@ ${issue.recommendations.map((rec) => `- ${rec}`).join('\n')}
 
     const bundle = report.bundleAnalysis;
 
-    return `## 📦 Bundle Size Analysis
+    return `${tSync('reports.bundle.title')}
 
-### Current Bundle Impact
-- **Total Bundle Size**: ${this.formatBytes(bundle.totalBundleSize)}
-- **Gzipped Size**: ${this.formatBytes(bundle.gzippedSize)}
-- **Unused Code Size**: ${this.formatBytes(bundle.unusedCodeSize)} (${bundle.potentialSavings.percentage.toFixed(1)}% of total)
+${tSync('reports.bundle.currentImpact')}
+${tSync('reports.bundle.totalBundleSize', { size: this.formatBytes(bundle.totalBundleSize) })}
+${tSync('reports.bundle.gzippedSize', { size: this.formatBytes(bundle.gzippedSize) })}
+${tSync('reports.bundle.unusedCodeSize', { 
+  size: this.formatBytes(bundle.unusedCodeSize), 
+  percentage: bundle.potentialSavings.percentage.toFixed(1) 
+})}
 
-### Potential Savings
-- **Raw Size Reduction**: ${this.formatBytes(bundle.potentialSavings.bytes)}
-- **Gzipped Reduction**: ${this.formatBytes(bundle.potentialSavings.gzipped)}
-- **Bundle Size Improvement**: ${bundle.potentialSavings.percentage.toFixed(1)}%
+${tSync('reports.bundle.potentialSavings')}
+${tSync('reports.bundle.rawSizeReduction', { size: this.formatBytes(bundle.potentialSavings.bytes) })}
+${tSync('reports.bundle.gzippedReduction', { size: this.formatBytes(bundle.potentialSavings.gzipped) })}
+${tSync('reports.bundle.bundleSizeImprovement', { percentage: bundle.potentialSavings.percentage.toFixed(1) })}
 
-### Top Unused Modules by Size
+${tSync('reports.bundle.topUnusedModules')}
 ${
   bundle.moduleBreakdown
     .filter((m) => m.isUnused)
@@ -314,10 +336,10 @@ ${
       (m) =>
         `- \`${path.relative(process.cwd(), m.path)}\` - ${this.formatBytes(m.size)} (${this.formatBytes(m.gzippedSize)} gzipped)`
     )
-    .join('\n') || '_No unused modules detected._'
+    .join('\n') || tSync('reports.bundle.noUnusedModules')
 }
 
-### Bundle Optimization Recommendations
+${tSync('reports.bundle.optimizationRecommendations')}
 ${
   bundle.recommendations.length > 0
     ? bundle.recommendations
@@ -326,7 +348,7 @@ ${
             `- **${rec.type}**: ${rec.description}\n  - Potential saving: ${this.formatBytes(rec.potentialSaving)}\n  - Action: ${rec.action}`
         )
         .join('\n\n')
-    : '_No specific bundle recommendations available._'
+    : tSync('reports.bundle.noRecommendations')
 }
 
 `;
@@ -334,11 +356,11 @@ ${
 
   private generateFileTable(files: any[]): string {
     if (files.length === 0) {
-      return '_No files found in this category._';
+      return tSync('reports.tables.noFilesFound');
     }
 
-    const headers = '| File | Type | Confidence | Reasons |';
-    const separator = '|------|------|------------|---------|';
+    const headers = tSync('reports.tables.fileTableHeaders');
+    const separator = tSync('reports.tables.fileTableSeparator');
 
     const rows = files.map((file) => {
       const relativePath = path.relative(process.cwd(), file.path);
@@ -350,11 +372,11 @@ ${
 
   private generateAPITable(apis: any[]): string {
     if (apis.length === 0) {
-      return '_No APIs found in this category._';
+      return tSync('reports.tables.noApisFound');
     }
 
-    const headers = '| API Path | Methods | File | Confidence | Reasons |';
-    const separator = '|----------|---------|------|------------|---------|';
+    const headers = tSync('reports.tables.apiTableHeaders');
+    const separator = tSync('reports.tables.apiTableSeparator');
 
     const rows = apis.map((api) => {
       const relativePath = path.relative(process.cwd(), api.filePath);
@@ -367,9 +389,14 @@ ${
   private async generateTSVReport(report: AnalysisReport, force: boolean = false): Promise<string> {
     const filePath = await this.getUniqueFilePath('analysis-report', 'tsv', force);
 
-    const headers = ['Type', 'Path', 'UsageCount', 'Classification', 'Confidence', 'Reasons'].join(
-      '\t'
-    );
+    const headers = [
+      tSync('reports.csv.headers.type'),
+      tSync('reports.csv.headers.path'),
+      tSync('reports.csv.headers.usageCount'),
+      tSync('reports.csv.headers.classification'),
+      tSync('reports.csv.headers.confidence'),
+      tSync('reports.csv.headers.reasons')
+    ].join('\t');
     const rows = [headers];
 
     // Add file data
@@ -416,7 +443,14 @@ ${
       return value;
     };
 
-    const headers = ['Type', 'Path', 'UsageCount', 'Classification', 'Confidence', 'Reasons']
+    const headers = [
+      tSync('reports.csv.headers.type'),
+      tSync('reports.csv.headers.path'),
+      tSync('reports.csv.headers.usageCount'),
+      tSync('reports.csv.headers.classification'),
+      tSync('reports.csv.headers.confidence'),
+      tSync('reports.csv.headers.reasons')
+    ]
       .map(escapeCSV)
       .join(',');
     const rows = [headers];
