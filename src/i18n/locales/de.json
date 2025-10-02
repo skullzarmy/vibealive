@@ -1,0 +1,163 @@
+{
+  "cli": {
+    "analysis": {
+      "starting": "🔍 Analysiere Next.js-Projekt...",
+      "detectingStructure": "📁 Erkenne Projektstruktur...",
+      "generatingHealthReport": "🏠 Erstelle Projekt-Gesundheitsbericht...",
+      "scanningFiles": "📋 Scanne Dateien...",
+      "analyzingBundles": "📦 Analysiere Bundle-Informationen...",
+      "buildingDependencyGraph": "🕸️  Erstelle Abhängigkeitsdiagramm...",
+      "generatingRecommendations": "💡 Generiere Empfehlungen...",
+      "complete": "✅ Analyse abgeschlossen!",
+      "failed": "❌ Analyse fehlgeschlagen:",
+      "initializingAnalysis": "- Initialisiere Analyse...",
+      "analysisCompleted": "✔ Analyse erfolgreich abgeschlossen!",
+      "generatingReports": "- Erstelle Berichte...",
+      "reportsGenerated": "✔ Berichte erstellt!"
+    },
+    "apiScan": {
+      "title": "🚀 API-Routen-Analyse",
+      "totalApiFiles": "• Gesamtanzahl API-Dateien: {{count}}",
+      "unusedRoutes": "• Ungenutzte Routen: {{count}}",
+      "activeRoutes": "• Aktive Routen: {{count}}",
+      "generatedReports": "📁 Generierte Berichte:",
+      "reportFile": "• {{file}}",
+      "failed": "API-Scan fehlgeschlagen"
+    },
+    "config": {
+      "initComplete": "🎉 Initialisierung abgeschlossen!",
+      "nextSteps": "Nächste Schritte:",
+      "reviewConfig": "   1. Durchsehen und passe .vibealive/config.js bei Bedarf an",
+      "runAnalyze": "   2. Führe `vibealive analyze` aus, um dein Projekt zu analysieren",
+      "cleanupCancelled": "ℹ️  Bereinigung abgebrochen.",
+      "cleanupComplete": "🎉 Bereinigung abgeschlossen!",
+      "removedVibeAliveDir": "✅ .vibealive-Verzeichnis entfernt",
+      "noFilesToCleanup": "🔍 Keine VibeAlive-Dateien zur Bereinigung gefunden.",
+      "cleanupConfirmation": "⚠️  Dies wird das gesamte .vibealive-Verzeichnis und {{count}} Bericht(e) dauerhaft löschen. Fortfahren? [y/N]: "
+    },
+    "errors": {
+      "analysisError": "❌ Analyse fehlgeschlagen:",
+      "configInitFailed": "❌ Konfiguration konnte nicht initialisiert werden:",
+      "cleanupFailed": "❌ Bereinigung fehlgeschlagen:",
+      "fileCheckFailed": "❌ Dateiüberprüfung fehlgeschlagen:",
+      "directoryScanFailed": "❌ Verzeichnis-Scan fehlgeschlagen:",
+      "componentScanFailed": "❌ Komponenten-Scan fehlgeschlagen:",
+      "apiScanFailed": "❌ API-Scan fehlgeschlagen:",
+      "mcpServerStartFailed": "❌ MCP-Server konnte nicht gestartet werden:",
+      "cleanupDirFailed": "❌ Entfernen des .vibealive-Verzeichnisses fehlgeschlagen: {{error}}"
+    },
+    "validation": {
+      "unsupportedFormat": "Nicht unterstütztes Format: {{format}}",
+      "invalidFormats": "Ungültiges Format: {{formats}}. Gültige Formate: {{validFormats}}",
+      "portMustBeNumber": "Port muss eine Zahl sein."
+    }
+  },
+  "reports": {
+    "markdown": {
+      "title": "# Next.js Code-Analysebericht",
+      "executiveSummary": "## 📊 Zusammenfassung",
+      "project": "- **Projekt**: {{project}}",
+      "nextVersion": "- **Next.js-Version**: {{version}}",
+      "routerType": "- **Router-Typ**: {{routerType}}",
+      "analysisDate": "- **Analysedatum**: {{date}}",
+      "analysisTime": "- **Analysezeit**: {{time}}",
+      "totalFiles": "- **Gesamtzahl analysierter Dateien**: {{count}}",
+      "totalComponents": "- **Gesamtzahl Komponenten**: {{count}}",
+      "totalApiEndpoints": "- **Gesamtzahl API-Endpunkte**: {{count}}",
+      "keyFindings": "## 🎯 Zentrale Erkenntnisse",
+      "unusedFiles": "### Ungenutzte Dateien",
+      "unusedFilesCount": "- **Anzahl**: {{count}}",
+      "potentialSavings": "- **Potenzielle Einsparungen bei Bundle-Größe**: {{size}}",
+      "deadCode": "### Dead Code",
+      "deadCodeCount": "- **Anzahl**: {{count}}",
+      "redundantApis": "### Redundante APIs",
+      "redundantApisCount": "- **Anzahl**: {{count}}",
+      "fileAnalysis": "## 🗂️ Dateianalyse",
+      "unusedFilesSection": "### Ungenutzte Dateien ({{count}})",
+      "deadCodeSection": "### Toter Code ({{count}})",
+      "apiAnalysis": "## 🔌 API-Analyse",
+      "unusedApisSection": "### Ungenutzte APIs ({{count}})",
+      "recommendations": "## 💡 Empfehlungen",
+      "dependencyGraph": "## 🏗️ Abhängigkeitsdiagramm",
+      "entryPoints": "### Einstiegspunkte",
+      "orphanedComponents": "### Unbenutzte Komponenten ({{count}})",
+      "circularDependencies": "### Zyklische Abhängigkeiten ({{count}})",
+      "cycle": "#### Zyklus {{index}}",
+      "safeDeletions": "## 📈 Sichere Löschungen",
+      "safeDeletionsDescription": "Die folgenden Dateien können mit hoher Sicherheit gelöscht werden:",
+      "generatedBy": "*Bericht erstellt von Next.js Analyzer am {{date}}*"
+    },
+    "health": {
+      "title": "## 🏥 Next.js-Projektgesundheits-Score: {{score}}/100",
+      "strengths": "### ✅ Stärken",
+      "improvements": "### 🔧 Verbesserungsbereiche",
+      "routingPatterns": "### 🛤️  Erweiterte Routing-Muster",
+      "ecosystemPackages": "### 📦 Next.js-Ökosystem-Pakete",
+      "setupIssues": "### ⚠️  Konfigurationsprobleme & Empfehlungen",
+      "criticalIssues": "#### 🚨 Kritische Probleme ({{count}})",
+      "warnings": "#### ⚠️  Warnungen ({{count}})",
+      "optimizationOpportunities": "#### ℹ️  Optimierungsmöglichkeiten ({{count}})",
+      "recommendations": "Empfehlungen:"
+    },
+    "bundle": {
+      "title": "## 📦 Bundle-Größenanalyse",
+      "currentImpact": "### Aktuelle Bundle-Auswirkungen",
+      "totalBundleSize": "- **Gesamtgröße des Bundles**: {{size}}",
+      "gzippedSize": "- **Gzipped-Größe**: {{size}}",
+      "unusedCodeSize": "- **Ungenutzte Code-Größe**: {{size}} ({{percentage}}% des Gesamtvolumens)",
+      "potentialSavings": "### Potenzielle Einsparungen",
+      "rawSizeReduction": "- **Rohgrößenreduzierung**: {{size}}",
+      "gzippedReduction": "- **Gzipped-Reduzierung**: {{size}}",
+      "bundleSizeImprovement": "- **Bundle-Größenverbesserung**: {{percentage}}%",
+      "topUnusedModules": "### Größte ungenutzte Module nach Größe",
+      "noUnusedModules": "_Keine ungenutzten Module gefunden._",
+      "optimizationRecommendations": "### Empfehlungen zur Bundle-Optimierung",
+      "noRecommendations": "_Keine spezifischen Bundle-Empfehlungen verfügbar._"
+    },
+    "tables": {
+      "fileTableHeaders": "| Datei | Typ | Vertrauen | Gründe |",
+      "fileTableSeparator": "|-------|-----|-----------|--------|",
+      "apiTableHeaders": "| API-Pfad | Methoden | Datei | Vertrauen | Gründe |",
+      "apiTableSeparator": "|----------|---------|-------|-----------|--------|",
+      "routingPatternHeaders": "| Mustertyp | Pfad | Zweck | Status |",
+      "routingPatternSeparator": "|-----------|------|-------|--------|",
+      "packageHeaders": "| Paket | Version | Einrichtungsstatus | Zweck |",
+      "packageSeparator": "|--------|---------|--------------------|-------|",
+      "noFilesFound": "_Keine Dateien in dieser Kategorie gefunden._",
+      "noApisFound": "_Keine APIs in dieser Kategorie gefunden._"
+    },
+    "csv": {
+      "headers": {
+        "type": "Typ",
+        "path": "Pfad",
+        "usageCount": "Nutzungsanzahl",
+        "classification": "Klassifizierung",
+        "confidence": "Vertrauen",
+        "reasons": "Gründe"
+      }
+    }
+  },
+  "status": {
+    "complete": "✅",
+    "partial": "⚠️",
+    "missing": "❌",
+    "misconfigured": "🔧",
+    "unknown": "❓",
+    "valid": "✅",
+    "invalid": "❌"
+  },
+  "mcp": {
+    "server": {
+      "starting": "🚀 Starte MCP-HTTP-Server mit Standards v2025-03-26...",
+      "running": "✅ MCP-Server läuft auf http://localhost:{{port}}",
+      "modernEndpoint": "🔗 Moderner Endpunkt: http://localhost:{{port}}/mcp",
+      "legacyEndpoint": "🔗 Veralteter Endpunkt: http://localhost:{{port}}/sse",
+      "protocol": "📋 Protokoll: v2025-03-26 mit abwärtskompatibel",
+      "security": "🛡️  Sicherheit: {{status}}",
+      "cors": "🌐 CORS: Für Browser-Clients aktiviert",
+      "clientConnecting": "📡 Veralteter SSE-Client verbindet sich (veraltet)",
+      "startingStdio": "🚀 Starte MCP-Server mit stdio-Transport...",
+      "readyStdio": "✅ MCP-Server bereit auf stdio-Transport"
+    }
+  }
+}
