@@ -11,6 +11,7 @@ npx vibealive analyze .
 # Use in different languages
 npx vibealive analyze . --locale es  # Spanish
 npx vibealive analyze . --locale fr  # French
+npx vibealive analyze . --locale de  # German
 
 # Start MCP server for IDE integration
 npx vibealive serve --stdio
