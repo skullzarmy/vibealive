@@ -44,6 +44,9 @@ describe('i18n', () => {
 
       setLocale('de');
       expect(getLocale()).toBe('de');
+
+      setLocale('pt');
+      expect(getLocale()).toBe('pt');
       
       setLocale('en');
       expect(getLocale()).toBe('en');
