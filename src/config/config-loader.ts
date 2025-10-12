@@ -61,7 +61,17 @@ export class ConfigLoader {
   }
 
   private static async findConfigFile(projectRoot: string): Promise<string | null> {
-    const configFiles = ['.vibealive/config.js', '.vibealive/config.mjs', '.vibealive/config.ts'];
+    const configFiles = [
+      '.vibealive.config.js',
+      '.vibealive.config.mjs',
+      '.vibealive.config.ts',
+      'next-analyzer.config.js',
+      'next-analyzer.config.mjs',
+      'next-analyzer.config.ts',
+      '.vibealive/config.js',
+      '.vibealive/config.mjs',
+      '.vibealive/config.ts',
+    ];
 
     for (const configFile of configFiles) {
       const filePath = path.join(projectRoot, configFile);

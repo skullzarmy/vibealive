@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import express from 'express';
 import cors from 'cors';
 import { randomUUID } from 'crypto';
+import { Server } from 'http';
 import { JobManager } from './job-manager';
 import { NextJSAnalyzer } from '../analyzer';
 import { AnalysisConfig } from '../types';
@@ -804,7 +805,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           '  Options: -f,--format <formats>',
           '  Example: vibealive perf-scan --format md',
           '',
-          'vibealive a11y-scan [project-path] - Check accessibility compliance',
+          'vibealive a11y-scan [project-path] - Comprehensive WCAG 2.2 accessibility audit',
           '  Options: -f,--format <formats>',
           '  Example: vibealive a11y-scan --format json',
           '',
@@ -1101,7 +1102,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
     {
       title: 'Check Accessibility Compliance',
       description:
-        'Scans for accessibility issues including missing alt tags, semantic HTML problems, and ARIA attribute issues.',
+        'Comprehensive WCAG 2.2 accessibility audit including alt text, ARIA labels, heading structure, keyboard navigation, color contrast, focus management, drag-drop alternatives, authentication complexity, and Next.js specific accessibility patterns.',
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
@@ -1133,9 +1134,16 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             {
               type: 'text',
               text:
-                `Accessibility check completed!\n\n` +
-                `Identified ${accessibilityIssues.length} accessibility issues\n` +
-                `Health Score: ${report.nextjsAnalysis?.projectHealth?.score || 'N/A'}/100\n\n` +
+                `WCAG 2.2 Accessibility Audit Completed!\n\n` +
+                `Found ${accessibilityIssues.length} accessibility issues across categories:\n` +
+                `• Alt text and image accessibility\n` +
+                `• ARIA labels and semantic HTML\n` +
+                `• Keyboard navigation and focus management\n` +
+                `• Color contrast and visual design\n` +
+                `• Form accessibility and input purpose\n` +
+                `• Screen reader compatibility\n` +
+                `• Next.js specific accessibility patterns\n\n` +
+                `Project Health Score: ${report.nextjsAnalysis?.projectHealth?.score || 'N/A'}/100\n\n` +
                 `Job ID: ${job.id} - Check detailed results with get-analysis-report`,
             },
           ],
@@ -1297,7 +1305,7 @@ export async function startMCPServerStdio(): Promise<void> {
  * Start MCP server with HTTP transport following v2025-03-26 standards
  * Supports modern Streamable HTTP and legacy SSE for backwards compatibility
  */
-export function startMCPServerHTTP(port: number): void {
+export function startMCPServerHTTP(port: number): Server {
   console.log(chalk.blue('🚀 Starting MCP HTTP Server with v2025-03-26 standards...'));
 
   const app = express();
@@ -1452,7 +1460,7 @@ export function startMCPServerHTTP(port: number): void {
     }
   });
 
-  app.listen(port, 'localhost', () => {
+  const server = app.listen(port, 'localhost', () => {
     console.log(chalk.green(`✅ MCP Server running on http://localhost:${port}`));
     console.log(chalk.blue(`🔗 Modern endpoint: http://localhost:${port}/mcp`));
     console.log(chalk.yellow(`🔗 Legacy endpoint: http://localhost:${port}/sse`));
@@ -1464,6 +1472,8 @@ export function startMCPServerHTTP(port: number): void {
     );
     console.log(chalk.green(`🌐 CORS: Enabled for browser clients`));
   });
+
+  return server;
 }
 
 /**

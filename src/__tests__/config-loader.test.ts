@@ -5,7 +5,7 @@ import * as path from 'path';
 
 describe('ConfigLoader', () => {
   let testProjectCounter = 0;
-  
+
   const getTestProjectPath = () => {
     testProjectCounter++;
     return path.join(__dirname, 'fixtures', `config-test-project-${testProjectCounter}`);
@@ -21,7 +21,7 @@ describe('ConfigLoader', () => {
   afterEach(async () => {
     await fs.remove(currentTestProjectPath);
     // Clear require cache to prevent interference between tests
-    Object.keys(require.cache).forEach(key => {
+    Object.keys(require.cache).forEach((key) => {
       if (key.includes('config-test-project')) {
         delete require.cache[key];
       }
