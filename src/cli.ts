@@ -12,7 +12,14 @@ import { ReportGenerator } from './generators/report-generator';
 import type { CLIOptions, OutputFormat, AnalysisConfig, Locale } from './types';
 import packageJson from '../package.json';
 import { startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
-import { t, tSync, setLocale, preloadLocale, getLocale, isLocaleSupported } from './i18n/utils/i18n';
+import {
+  t,
+  tSync,
+  setLocale,
+  preloadLocale,
+  getLocale,
+  isLocaleSupported,
+} from './i18n/utils/i18n';
 
 const program = new Command();
 
@@ -29,7 +36,11 @@ program
   .name('vibealive')
   .description('Universal Next.js code analysis tool')
   .version(packageJson.version)
-  .option('--locale <locale>', 'Set the display language (en, es, fr, de, ja, zh, pt, ru, it, ko)', 'en');
+  .option(
+    '--locale <locale>',
+    'Set the display language (en, es, fr, de, ja, zh, pt, ru, it, ko)',
+    'en'
+  );
 
 // Initialize locale from CLI option
 program.hook('preAction', async (thisCommand) => {
@@ -313,15 +324,15 @@ program
   .command('a11y-scan')
   .argument('[project-path]', 'Path to the Next.js project (defaults to current directory)', '.')
   .option('-f, --format <formats>', 'Output formats (json,md,tsv,csv)', parseFormats, ['json'])
-  .description('Check accessibility including alt tags, semantic HTML, and ARIA attributes')
+  .description(tSync('cli.accessibility.description'))
   .action(async (projectPath: string, options: { format: OutputFormat[] }) => {
     const startTime = Date.now();
     try {
-      console.log('♿ Checking accessibility setup...');
+      console.log(tSync('cli.accessibility.starting'));
       await runFocusedAnalysis(projectPath, options, 'accessibility', [], ['accessibility']);
-      console.log('♿ Accessibility check completed in', Date.now() - startTime, 'ms');
+      console.log(tSync('cli.accessibility.completed', { time: Date.now() - startTime }));
     } catch (error) {
-      console.error(chalk.red('❌ Accessibility check failed:'), error);
+      console.error(chalk.red(tSync('cli.accessibility.failed')), error);
       process.exit(1);
     }
   });
@@ -972,10 +983,14 @@ async function runApiScan(projectPath: string, options: any): Promise<void> {
     console.log(chalk.green(tSync('cli.apiScan.title')));
     console.log(tSync('cli.apiScan.totalApiFiles', { count: chalk.bold(apiFiles.length) }));
     console.log(
-      tSync('cli.apiScan.unusedRoutes', { count: chalk.bold(apiFiles.filter((f) => f.classification === 'UNUSED').length) })
+      tSync('cli.apiScan.unusedRoutes', {
+        count: chalk.bold(apiFiles.filter((f) => f.classification === 'UNUSED').length),
+      })
     );
     console.log(
-      tSync('cli.apiScan.activeRoutes', { count: chalk.bold(apiFiles.filter((f) => f.classification === 'ACTIVE').length) })
+      tSync('cli.apiScan.activeRoutes', {
+        count: chalk.bold(apiFiles.filter((f) => f.classification === 'ACTIVE').length),
+      })
     );
 
     console.log(chalk.blue(tSync('cli.apiScan.generatedReports')));
@@ -1170,10 +1185,12 @@ function parseFormats(value: string): OutputFormat[] {
 
   for (const format of formats) {
     if (!validFormats.includes(format)) {
-      throw new Error(tSync('cli.validation.invalidFormats', { 
-        formats: format, 
-        validFormats: validFormats.join(', ') 
-      }));
+      throw new Error(
+        tSync('cli.validation.invalidFormats', {
+          formats: format,
+          validFormats: validFormats.join(', '),
+        })
+      );
     }
   }
 

@@ -11,7 +11,7 @@ VibeAlive is a powerful, framework-aware code analysis tool designed specificall
 - **Multiple Report Formats:** Generates reports in JSON (for machine consumption), Markdown, and other formats
 - **Local-First MCP Server:** Includes a built-in MCP-compliant server using the official SDK v1.18.1 for programmatic access and integration with LLM agents
 - **Advanced Pattern Detection:** Identifies Next.js routing patterns including route groups, private folders, intercepting routes, parallel routes, and dynamic segments
-- **Package Analysis:** Detects common Next.js packages and provides setup recommendations for themes, SEO, performance, and accessibility
+- **Package Analysis:** Detects common Next.js packages and provides setup recommendations for themes, SEO, performance, and comprehensive WCAG 2.2 accessibility compliance
 - **Project Health Scoring:** Comprehensive analysis with actionable recommendations for improvement
 
 ## Usage
@@ -30,7 +30,8 @@ Analysis reports include:
 - **Unused API Routes:** API endpoints with no incoming requests detected
 - **Dependency Graph:** Visual representation of file dependencies
 - **Framework Patterns:** Advanced Next.js routing and architectural patterns in use
-- **Setup Analysis:** Missing or incomplete configurations for common packages
+- **Setup Analysis:** Missing or incomplete configurations for common packages including comprehensive accessibility auditing
+- **Accessibility Compliance:** Full WCAG 2.2 audit covering alt text, ARIA, keyboard navigation, focus management, color contrast, and Next.js specific patterns
 - **Performance Recommendations:** Optimization opportunities and best practices
 
 See [cli.md](./cli.md) and [mcp.md](./mcp.md) for detailed usage instructions.

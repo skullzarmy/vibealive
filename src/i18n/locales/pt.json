@@ -50,6 +50,238 @@
       "unsupportedFormat": "Formato não suportado: {{format}}",
       "invalidFormats": "Formato inválido: {{formats}}. Formatos válidos: {{validFormats}}",
       "portMustBeNumber": "A porta deve ser um número."
+    },
+    "accessibility": {
+      "title": "♿ Auditoria de Acessibilidade WCAG 2.2",
+      "description": "Auditoria abrangente de acessibilidade WCAG 2.2 incluindo texto alternativo, rótulos ARIA, navegação por teclado, contraste de cores, gerenciamento de foco e padrões específicos do Next.js",
+      "starting": "♿ Executando auditoria abrangente de acessibilidade WCAG 2.2...",
+      "completed": "♿ Auditoria de acessibilidade WCAG 2.2 concluída em {{time}} ms",
+      "failed": "❌ Falha na auditoria de acessibilidade WCAG 2.2:",
+      "issues": {
+        "missingAltText": {
+          "title": "Texto Alternativo Ausente (WCAG 2.2: 1.1.1)",
+          "description": "Imagens encontradas sem atributos alt apropriados. Isso impede que leitores de tela descrevam imagens para usuários.",
+          "recommendations": [
+            "Adicionar atributos alt descritivos a todas as imagens significativas",
+            "Usar alt=\"\" para imagens puramente decorativas",
+            "Para Next.js, usar o componente Image com props alt apropriados",
+            "Considerar usar aria-label para imagens complexas",
+            "Garantir que o texto alt descreva o conteúdo e contexto da imagem"
+          ]
+        },
+        "improperHeadingOrder": {
+          "title": "Estrutura de Cabeçalhos Inadequada (WCAG 2.2: 1.3.1)",
+          "description": "A hierarquia de cabeçalhos não é mantida adequadamente, tornando a estrutura do conteúdo pouco clara para leitores de tela.",
+          "recommendations": [
+            "Usar cabeçalhos em ordem sequencial (h1, h2, h3, etc.)",
+            "Garantir que cada página tenha um elemento h1",
+            "Não pular níveis de cabeçalhos",
+            "Usar cabeçalhos para estruturar conteúdo, não apenas para estilo",
+            "Considerar usar aria-labelledby para relações complexas de cabeçalhos"
+          ]
+        },
+        "inaccessibleForms": {
+          "title": "Elementos de Formulário Inacessíveis (WCAG 2.2: 1.3.1, 1.3.5, 3.3.7)",
+          "description": "Campos de entrada sem rótulos apropriados, atributos de autocompletar ou nomes acessíveis.",
+          "recommendations": [
+            "Associar cada entrada com um rótulo descritivo",
+            "Usar aria-label ou aria-labelledby quando rótulos visuais não forem possíveis",
+            "Adicionar atributos de autocompletar para identificar o propósito da entrada",
+            "Fornecer mensagens de erro claras com aria-describedby",
+            "Agrupar entradas relacionadas com fieldset e legend",
+            "Implementar feedback apropriado de validação de formulário"
+          ]
+        },
+        "keyboardNavigation": {
+          "title": "Problemas de Navegação por Teclado (WCAG 2.2: 2.1.1, 2.1.4, 2.5.1)",
+          "description": "Elementos interativos não acessíveis via teclado ou falta de gerenciamento apropriado de foco.",
+          "recommendations": [
+            "Garantir que todos os elementos interativos sejam acessíveis por teclado",
+            "Adicionar manipuladores de eventos de teclado junto com eventos de mouse",
+            "Usar elementos HTML semânticos apropriados (button, a, input)",
+            "Implementar ordem lógica de tabulação com tabindex se necessário",
+            "Fornecer indicadores visuais de foco",
+            "Adicionar alternativas de ponteiro único para gestos complexos",
+            "Implementar mecanismos de escape para conteúdo acionado"
+          ]
+        },
+        "missingHeadingStructure": {
+          "title": "Estrutura de Cabeçalhos Ausente (WCAG 2.2: 1.3.1)",
+          "description": "Páginas sem estrutura adequada de cabeçalhos, afetando a navegação de conteúdo para tecnologias assistivas.",
+          "recommendations": [
+            "Adicionar elemento h1 para identificar o conteúdo principal da página",
+            "Usar hierarquia de cabeçalhos para estruturar seções de conteúdo",
+            "Garantir que cabeçalhos sejam descritivos e significativos",
+            "Usar elementos HTML semânticos junto com cabeçalhos"
+          ]
+        },
+        "missingFocusIndicators": {
+          "title": "Indicadores de Foco Ausentes (WCAG 2.2: 2.4.7, 2.4.11)",
+          "description": "Elementos interativos carecem de indicadores visuais de foco ou o foco pode estar obscurecido.",
+          "recommendations": [
+            "Fornecer indicadores de foco claros para todos os elementos interativos",
+            "Usar :focus-visible para gerenciamento moderno de foco",
+            "Garantir que indicadores de foco tenham contraste suficiente (mínimo 3:1)",
+            "Evitar remover estilos de foco padrão sem substituição",
+            "Garantir que elementos focados não sejam obscurecidos por conteúdo sticky/fixed",
+            "Testar visibilidade do foco em diferentes navegadores"
+          ]
+        },
+        "autoplayMedia": {
+          "title": "Problemas de Mídia com Reprodução Automática (WCAG 2.2: 2.2.2)",
+          "description": "Conteúdo de mídia reproduz automaticamente sem controle do usuário, o que pode ser desorientador ou distrativo.",
+          "recommendations": [
+            "Fornecer controles para mídia que reproduz automaticamente",
+            "Permitir que usuários pausem, parem ou ocultem conteúdo em movimento",
+            "Limitar duração de reprodução automática a 5 segundos ou menos",
+            "Fornecer controles claros para carrosséis e sliders",
+            "Considerar media query prefers-reduced-motion"
+          ]
+        },
+        "missingSkipLinks": {
+          "title": "Links de Pular Ausentes (WCAG 2.2: 2.4.1)",
+          "description": "Nenhum link de pular encontrado para ajudar usuários de teclado a contornar conteúdo repetitivo.",
+          "recommendations": [
+            "Adicionar link \"Pular para o conteúdo principal\" no início das páginas",
+            "Incluir links de pular para navegação e outros blocos repetitivos",
+            "Garantir que links de pular sejam acessíveis por teclado",
+            "Tornar links de pular visíveis no foco ou sempre visíveis",
+            "Testar funcionalidade de links de pular com navegação por teclado"
+          ]
+        },
+        "missingPageTitles": {
+          "title": "Títulos de Página Ausentes (WCAG 2.2: 2.4.2)",
+          "description": "Páginas carecem de títulos adequados, dificultando a navegação para usuários de leitores de tela.",
+          "recommendations": [
+            "Adicionar títulos únicos e descritivos a todas as páginas",
+            "Usar componente Head do Next.js ou API de metadata",
+            "Incluir hierarquia de página nos títulos (ex: \"Página - Seção - Site\")",
+            "Manter títulos concisos mas informativos",
+            "Atualizar títulos dinamicamente para aplicações de página única"
+          ]
+        },
+        "inaccessibleLinks": {
+          "title": "Texto de Links Inacessível (WCAG 2.2: 2.4.4)",
+          "description": "Links com nomes vagos ou acessíveis ausentes tornam a navegação pouco clara.",
+          "recommendations": [
+            "Usar texto descritivo de links que explique o destino",
+            "Evitar texto genérico como \"clique aqui\" ou \"leia mais\"",
+            "Fornecer contexto com aria-label ou aria-describedby quando necessário",
+            "Garantir que o propósito do link seja claro apenas pelo texto",
+            "Usar componente Link do Next.js para navegação interna"
+          ]
+        },
+        "missingAriaLabels": {
+          "title": "Rótulos ARIA Ausentes (WCAG 2.2: 4.1.2, 2.5.3)",
+          "description": "Controles personalizados carecem de rótulos ARIA adequados ou nomes acessíveis.",
+          "recommendations": [
+            "Adicionar aria-label ou aria-labelledby a controles personalizados",
+            "Garantir que texto de rótulo visível corresponda ao nome acessível",
+            "Usar elementos HTML semânticos quando possível",
+            "Fornecer atributos role para widgets personalizados",
+            "Testar com leitores de tela para verificar nomes acessíveis"
+          ]
+        },
+        "lowContrastColors": {
+          "title": "Problemas Potenciais de Contraste de Cor (WCAG 2.2: 1.4.3, 1.4.11)",
+          "description": "Combinações de cores podem não atender aos requisitos mínimos de contraste.",
+          "recommendations": [
+            "Testar proporções de contraste de cor (4.5:1 para texto normal, 3:1 para texto grande)",
+            "Usar verificadores de contraste online para verificar conformidade",
+            "Garantir que elementos não textuais tenham contraste 3:1 com o fundo",
+            "Não depender apenas da cor para transmitir informações",
+            "Considerar alternativas de modo escuro e alto contraste"
+          ]
+        },
+        "missingLanguageAttributes": {
+          "title": "Atributos de Idioma Ausentes (WCAG 2.2: 3.1.1)",
+          "description": "Idioma da página não especificado, afetando a pronúncia do leitor de tela.",
+          "recommendations": [
+            "Adicionar atributo lang ao elemento html",
+            "Usar configuração de locale no Next.js para internacionalização",
+            "Especificar mudanças de idioma dentro do conteúdo usando atributo lang",
+            "Garantir que códigos de idioma sigam o padrão BCP 47"
+          ]
+        },
+        "missingLiveRegions": {
+          "title": "Regiões Ao Vivo Ausentes (WCAG 2.2: 4.1.3)",
+          "description": "Mensagens de status e atualizações de conteúdo dinâmico não são anunciadas para leitores de tela.",
+          "recommendations": [
+            "Usar aria-live para atualizações de conteúdo dinâmico",
+            "Implementar role=\"alert\" para mensagens importantes",
+            "Usar role=\"status\" para atualizações menos críticas",
+            "Considerar aria-atomic para atualizações completas de mensagens",
+            "Testar anúncios de status com leitores de tela"
+          ]
+        },
+        "dragDropWithoutAlternatives": {
+          "title": "Arrastar-Soltar Sem Alternativas (WCAG 2.2: 2.5.7)",
+          "description": "Funcionalidade de arrastar e soltar carece de alternativas de ponteiro único.",
+          "recommendations": [
+            "Fornecer alternativas acessíveis por teclado para arrastar-soltar",
+            "Adicionar botões para reordenar ou mover itens",
+            "Implementar navegação com teclas de seta para listas ordenáveis",
+            "Usar marcação semântica com papéis ARIA adequados",
+            "Testar funcionalidade com teclado e tecnologias assistivas"
+          ]
+        },
+        "authenticationComplexity": {
+          "title": "Autenticação Complexa (WCAG 2.2: 3.3.8)",
+          "description": "Métodos de autenticação podem ser muito complexos para usuários com deficiências cognitivas.",
+          "recommendations": [
+            "Fornecer alternativas a testes de função cognitiva",
+            "Suportar gerenciadores de senha e preenchimento automático",
+            "Oferecer múltiplos métodos de autenticação",
+            "Permitir copiar/colar em campos de senha",
+            "Fornecer instruções claras e texto de ajuda",
+            "Considerar autenticação biométrica ou baseada em token"
+          ]
+        },
+        "missingLandmarks": {
+          "title": "Marcos de Referência Ausentes (WCAG 2.2: 1.3.6)",
+          "description": "A página carece de marcos ARIA para navegação estrutural.",
+          "recommendations": [
+            "Adicionar papéis de marco apropriados (main, nav, aside, etc.)",
+            "Usar elementos HTML5 semânticos que fornecem marcos implícitos",
+            "Garantir que cada marco tenha um propósito único",
+            "Fornecer rótulos para múltiplos marcos do mesmo tipo",
+            "Testar navegação por marcos com leitores de tela"
+          ]
+        },
+        "missingButtonLabels": {
+          "title": "Rótulos de Botão Ausentes (WCAG 2.2: 4.1.2)",
+          "description": "Botões carecem de rótulos acessíveis ou têm rótulos não descritivos.",
+          "recommendations": [
+            "Fornecer texto descritivo para todos os botões",
+            "Usar aria-label para botões apenas com ícones",
+            "Garantir que rótulos de botão descrevam a ação",
+            "Evitar rótulos vagos como \"OK\" ou \"Enviar\"",
+            "Testar rótulos de botão com leitores de tela"
+          ]
+        },
+        "improperTableStructure": {
+          "title": "Estrutura de Tabela Inadequada (WCAG 2.2: 1.3.1)",
+          "description": "Tabelas carecem de estrutura semântica adequada para navegação assistiva.",
+          "recommendations": [
+            "Usar elementos th para cabeçalhos de tabela",
+            "Fornecer elementos caption para descrever propósito da tabela",
+            "Usar atributos scope para associar cabeçalhos com células",
+            "Implementar summary para tabelas complexas",
+            "Evitar usar tabelas para layout"
+          ]
+        },
+        "insufficientColorContrast": {
+          "title": "Contraste de Cor Insuficiente (WCAG 2.2: 1.4.3)",
+          "description": "Elementos de texto e fundo não têm contraste suficiente para legibilidade.",
+          "recommendations": [
+            "Garantir proporção de contraste mínima 4.5:1 para texto normal",
+            "Usar proporção de contraste mínima 3:1 para texto grande",
+            "Testar contraste com ferramentas de verificação",
+            "Considerar usuários com deficiências de visão de cores",
+            "Fornecer opções de alto contraste"
+          ]
+        }
+      }
     }
   },
   "reports": {

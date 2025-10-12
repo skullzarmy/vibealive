@@ -27,7 +27,7 @@ The VibeAlive MCP server exposes Next.js analysis capabilities through the stand
 - **`analyze-theme-setup`**: Analyze theme configuration and dark mode setup
 - **`audit-seo-setup`**: Comprehensive SEO audit including metadata and structured data
 - **`scan-performance-issues`**: Identify performance problems and optimization opportunities
-- **`check-accessibility`**: Scan for accessibility issues and ARIA problems
+- **`check-accessibility`**: Comprehensive WCAG 2.2 accessibility audit including alt text, ARIA labels, keyboard navigation, color contrast, focus management, and Next.js patterns
 - **`detect-nextjs-patterns`**: Identify advanced Next.js routing patterns
 - **`validate-project-health`**: Overall project health score with recommendations
 

@@ -50,6 +50,238 @@
       "unsupportedFormat": "Nicht unterstütztes Format: {{format}}",
       "invalidFormats": "Ungültiges Format: {{formats}}. Gültige Formate: {{validFormats}}",
       "portMustBeNumber": "Port muss eine Zahl sein."
+    },
+    "accessibility": {
+      "title": "♿ WCAG 2.2 Barrierefreiheitsprüfung",
+      "description": "Umfassende WCAG 2.2 Barrierefreiheitsprüfung einschließlich Alt-Text, ARIA-Labels, Tastaturnavigation, Farbkontrast, Fokusmanagement und Next.js-spezifische Patterns",
+      "starting": "♿ Umfassende WCAG 2.2 Barrierefreiheitsprüfung wird ausgeführt...",
+      "completed": "♿ WCAG 2.2 Barrierefreiheitsprüfung abgeschlossen in {{time}} ms",
+      "failed": "❌ WCAG 2.2 Barrierefreiheitsprüfung fehlgeschlagen:",
+      "issues": {
+        "missingAltText": {
+          "title": "Fehlender Alt-Text (WCAG 2.2: 1.1.1)",
+          "description": "Bilder ohne ordnungsgemäße Alt-Attribute gefunden. Dies verhindert, dass Screenreader Bilder für Benutzer beschreiben.",
+          "recommendations": [
+            "Beschreibende Alt-Attribute zu allen bedeutsamen Bildern hinzufügen",
+            "Alt=\"\" für rein dekorative Bilder verwenden",
+            "Für Next.js die Image-Komponente mit ordnungsgemäßen Alt-Props verwenden",
+            "Aria-label für komplexe Bilder in Betracht ziehen",
+            "Sicherstellen, dass Alt-Text Inhalt und Kontext des Bildes beschreibt"
+          ]
+        },
+        "improperHeadingOrder": {
+          "title": "Unsachgemäße Überschriftenstruktur (WCAG 2.2: 1.3.1)",
+          "description": "Die Überschriftenhierarchie wird nicht ordnungsgemäß eingehalten, wodurch die Inhaltsstruktur für Screenreader unklar wird.",
+          "recommendations": [
+            "Überschriften in sequenzieller Reihenfolge verwenden (h1, h2, h3, etc.)",
+            "Sicherstellen, dass jede Seite ein h1-Element hat",
+            "Überschriftenebenen nicht überspringen",
+            "Überschriften zur Strukturierung von Inhalten verwenden, nicht nur für Styling",
+            "Aria-labelledby für komplexe Überschriftenbeziehungen in Betracht ziehen"
+          ]
+        },
+        "inaccessibleForms": {
+          "title": "Unzugängliche Formularelemente (WCAG 2.2: 1.3.1, 1.3.5, 3.3.7)",
+          "description": "Formulareingaben ohne ordnungsgemäße Labels, Autocomplete-Attribute oder zugängliche Namen.",
+          "recommendations": [
+            "Jede Eingabe mit einem beschreibenden Label verknüpfen",
+            "Aria-label oder aria-labelledby verwenden, wenn visuelle Labels nicht möglich sind",
+            "Autocomplete-Attribute hinzufügen, um den Eingabezweck zu identifizieren",
+            "Klare Fehlermeldungen mit aria-describedby bereitstellen",
+            "Verwandte Eingaben mit fieldset und legend gruppieren",
+            "Ordnungsgemäße Formularvalidierungs-Rückmeldung implementieren"
+          ]
+        },
+        "keyboardNavigation": {
+          "title": "Probleme mit Tastaturnavigation (WCAG 2.2: 2.1.1, 2.1.4, 2.5.1)",
+          "description": "Interaktive Elemente nicht über Tastatur zugänglich oder fehlende ordnungsgemäße Fokusverwaltung.",
+          "recommendations": [
+            "Sicherstellen, dass alle interaktiven Elemente über Tastatur zugänglich sind",
+            "Tastatur-Event-Handler neben Maus-Events hinzufügen",
+            "Ordnungsgemäße semantische HTML-Elemente verwenden (button, a, input)",
+            "Logische Tab-Reihenfolge mit tabindex implementieren, falls erforderlich",
+            "Sichtbare Fokusindikatoren bereitstellen",
+            "Einzelzeiger-Alternativen für komplexe Gesten hinzufügen",
+            "Escape-Mechanismen für ausgelösten Inhalt implementieren"
+          ]
+        },
+        "missingHeadingStructure": {
+          "title": "Fehlende Überschriftenstruktur (WCAG 2.2: 1.3.1)",
+          "description": "Seiten ohne ordnungsgemäße Überschriftenstruktur beeinträchtigen die Inhaltsnavigation für assistive Technologien.",
+          "recommendations": [
+            "H1-Element hinzufügen, um Hauptseiteninhalt zu identifizieren",
+            "Überschriftenhierarchie zur Strukturierung von Inhaltsbereichen verwenden",
+            "Sicherstellen, dass Überschriften beschreibend und aussagekräftig sind",
+            "Semantische HTML-Elemente neben Überschriften verwenden"
+          ]
+        },
+        "missingFocusIndicators": {
+          "title": "Fehlende Fokus-Indikatoren (WCAG 2.2: 2.4.7, 2.4.11)",
+          "description": "Interaktive Elemente haben keine sichtbaren Fokus-Indikatoren oder der Fokus kann verdeckt sein.",
+          "recommendations": [
+            "Klare Fokus-Indikatoren für alle interaktiven Elemente bereitstellen",
+            ":focus-visible für modernes Fokus-Management verwenden",
+            "Sicherstellen, dass Fokus-Indikatoren ausreichenden Kontrast haben (mindestens 3:1)",
+            "Vermeiden, Standard-Fokus-Stile ohne Ersatz zu entfernen",
+            "Sicherstellen, dass fokussierte Elemente nicht durch sticky/fixed Inhalt verdeckt werden",
+            "Fokus-Sichtbarkeit in verschiedenen Browsern testen"
+          ]
+        },
+        "autoplayMedia": {
+          "title": "Autoplay-Medien-Probleme (WCAG 2.2: 2.2.2)",
+          "description": "Medieninhalte werden automatisch ohne Benutzerkontrolle abgespielt, was desorientierend oder ablenkend sein kann.",
+          "recommendations": [
+            "Steuerelemente für automatisch abspielende Medien bereitstellen",
+            "Benutzern erlauben, bewegte Inhalte zu pausieren, zu stoppen oder zu verbergen",
+            "Autoplay-Dauer auf 5 Sekunden oder weniger begrenzen",
+            "Klare Steuerelemente für Karussells und Schieberegler bereitstellen",
+            "Prefers-reduced-motion Media Query berücksichtigen"
+          ]
+        },
+        "missingSkipLinks": {
+          "title": "Fehlende Sprunglinks (WCAG 2.2: 2.4.1)",
+          "description": "Keine Sprunglinks gefunden, um Tastaturbenutzern zu helfen, sich wiederholende Inhalte zu umgehen.",
+          "recommendations": [
+            "\"Zum Hauptinhalt springen\"-Link am Anfang der Seiten hinzufügen",
+            "Sprunglinks für Navigation und andere sich wiederholende Blöcke einschließen",
+            "Sicherstellen, dass Sprunglinks über die Tastatur zugänglich sind",
+            "Sprunglinks beim Fokus sichtbar oder immer sichtbar machen",
+            "Sprunglink-Funktionalität mit Tastaturnavigation testen"
+          ]
+        },
+        "missingPageTitles": {
+          "title": "Fehlende Seitentitel (WCAG 2.2: 2.4.2)",
+          "description": "Seiten haben keine ordnungsgemäßen Titel, was die Navigation für Screenreader-Benutzer erschwert.",
+          "recommendations": [
+            "Eindeutige, beschreibende Titel zu allen Seiten hinzufügen",
+            "Next.js Head-Komponente oder Metadata-API verwenden",
+            "Seitenhierarchie in Titeln einbeziehen (z.B. \"Seite - Bereich - Site\")",
+            "Titel prägnant aber informativ halten",
+            "Titel dynamisch für Single-Page-Anwendungen aktualisieren"
+          ]
+        },
+        "inaccessibleLinks": {
+          "title": "Unzugänglicher Link-Text (WCAG 2.2: 2.4.4)",
+          "description": "Links mit vagen oder fehlenden zugänglichen Namen machen die Navigation unklar.",
+          "recommendations": [
+            "Beschreibenden Link-Text verwenden, der das Ziel erklärt",
+            "Generischen Text wie \"hier klicken\" oder \"mehr lesen\" vermeiden",
+            "Kontext mit aria-label oder aria-describedby bei Bedarf bereitstellen",
+            "Sicherstellen, dass der Link-Zweck allein aus dem Text klar wird",
+            "Next.js Link-Komponente für interne Navigation verwenden"
+          ]
+        },
+        "missingAriaLabels": {
+          "title": "Fehlende ARIA-Labels (WCAG 2.2: 4.1.2, 2.5.3)",
+          "description": "Benutzerdefinierte Steuerelemente haben keine ordnungsgemäßen ARIA-Labels oder zugänglichen Namen.",
+          "recommendations": [
+            "Aria-label oder aria-labelledby zu benutzerdefinierten Steuerelementen hinzufügen",
+            "Sicherstellen, dass sichtbarer Label-Text mit zugänglichem Namen übereinstimmt",
+            "Semantische HTML-Elemente wenn möglich verwenden",
+            "Role-Attribute für benutzerdefinierte Widgets bereitstellen",
+            "Mit Screenreadern testen, um zugängliche Namen zu verifizieren"
+          ]
+        },
+        "lowContrastColors": {
+          "title": "Potenzielle Farbkontrast-Probleme (WCAG 2.2: 1.4.3, 1.4.11)",
+          "description": "Farbkombinationen erfüllen möglicherweise nicht die Mindestkontrast-Anforderungen.",
+          "recommendations": [
+            "Farbkontrast-Verhältnisse testen (4.5:1 für normalen Text, 3:1 für großen Text)",
+            "Online-Kontrast-Checker zur Compliance-Verifizierung verwenden",
+            "Sicherstellen, dass Nicht-Text-Elemente 3:1 Kontrast zum Hintergrund haben",
+            "Nicht ausschließlich auf Farbe angewiesen sein, um Informationen zu vermitteln",
+            "Dunkelmodus und hohen Kontrast-Alternativen berücksichtigen"
+          ]
+        },
+        "missingLanguageAttributes": {
+          "title": "Fehlende Sprach-Attribute (WCAG 2.2: 3.1.1)",
+          "description": "Seitensprache nicht angegeben, was die Screenreader-Aussprache beeinträchtigt.",
+          "recommendations": [
+            "Lang-Attribut zum HTML-Element hinzufügen",
+            "Locale-Konfiguration in Next.js für Internationalisierung verwenden",
+            "Sprachwechsel im Inhalt mit lang-Attribut spezifizieren",
+            "Sicherstellen, dass Sprachcodes dem BCP 47-Standard folgen"
+          ]
+        },
+        "missingLiveRegions": {
+          "title": "Fehlende Live-Regionen (WCAG 2.2: 4.1.3)",
+          "description": "Statusmeldungen und dynamische Inhaltsupdates werden Screenreadern nicht angekündigt.",
+          "recommendations": [
+            "Aria-live für dynamische Inhaltsupdates verwenden",
+            "Role=\"alert\" für wichtige Nachrichten implementieren",
+            "Role=\"status\" für weniger kritische Updates verwenden",
+            "Aria-atomic für vollständige Nachrichten-Updates berücksichtigen",
+            "Status-Ankündigungen mit Screenreadern testen"
+          ]
+        },
+        "dragDropWithoutAlternatives": {
+          "title": "Drag-Drop ohne Alternativen (WCAG 2.2: 2.5.7)",
+          "description": "Drag-and-Drop-Funktionalität hat keine Single-Pointer-Alternativen.",
+          "recommendations": [
+            "Tastatur-zugängliche Alternativen zu Drag-Drop bereitstellen",
+            "Schaltflächen zum Umordnen oder Verschieben von Elementen hinzufügen",
+            "Pfeiltasten-Navigation für sortierbare Listen implementieren",
+            "Semantisches Markup mit ordnungsgemäßen ARIA-Rollen verwenden",
+            "Funktionalität mit Tastatur und assistiven Technologien testen"
+          ]
+        },
+        "authenticationComplexity": {
+          "title": "Komplexe Authentifizierung (WCAG 2.2: 3.3.8)",
+          "description": "Authentifizierungsmethoden können für Benutzer mit kognitiven Behinderungen zu komplex sein.",
+          "recommendations": [
+            "Alternativen zu kognitiven Funktionstests bereitstellen",
+            "Passwort-Manager und Autovervollständigung unterstützen",
+            "Mehrere Authentifizierungsmethoden anbieten",
+            "Kopieren/Einfügen in Passwort-Feldern erlauben",
+            "Klare Anweisungen und Hilfetext bereitstellen",
+            "Biometrische oder token-basierte Authentifizierung berücksichtigen"
+          ]
+        },
+        "missingLandmarks": {
+          "title": "Fehlende Orientierungspunkte (WCAG 2.2: 1.3.6)",
+          "description": "Die Seite hat keine ARIA-Landmarks für strukturelle Navigation.",
+          "recommendations": [
+            "Geeignete Landmark-Rollen hinzufügen (main, nav, aside, etc.)",
+            "Semantische HTML5-Elemente verwenden, die implizite Landmarks bereitstellen",
+            "Sicherstellen, dass jeder Landmark einen eindeutigen Zweck hat",
+            "Labels für mehrere Landmarks desselben Typs bereitstellen",
+            "Landmark-Navigation mit Screenreadern testen"
+          ]
+        },
+        "missingButtonLabels": {
+          "title": "Fehlende Button-Labels (WCAG 2.2: 4.1.2)",
+          "description": "Buttons haben keine zugänglichen Labels oder haben nicht-beschreibende Labels.",
+          "recommendations": [
+            "Beschreibenden Text für alle Buttons bereitstellen",
+            "Aria-label für Icon-Only-Buttons verwenden",
+            "Sicherstellen, dass Button-Labels die Aktion beschreiben",
+            "Vage Labels wie \"OK\" oder \"Senden\" vermeiden",
+            "Button-Labels mit Screenreadern testen"
+          ]
+        },
+        "improperTableStructure": {
+          "title": "Ungeeignete Tabellenstruktur (WCAG 2.2: 1.3.1)",
+          "description": "Tabellen haben keine ordnungsgemäße semantische Struktur für assistive Navigation.",
+          "recommendations": [
+            "Th-Elemente für Tabellen-Header verwenden",
+            "Caption-Elemente bereitstellen, um Tabellenzweck zu beschreiben",
+            "Scope-Attribute verwenden, um Header mit Zellen zu verknüpfen",
+            "Summary für komplexe Tabellen implementieren",
+            "Vermeiden, Tabellen für Layout zu verwenden"
+          ]
+        },
+        "insufficientColorContrast": {
+          "title": "Unzureichender Farbkontrast (WCAG 2.2: 1.4.3)",
+          "description": "Text- und Hintergrundelemente haben nicht genügend Kontrast für Lesbarkeit.",
+          "recommendations": [
+            "Mindest-Kontrast-Verhältnis 4.5:1 für normalen Text sicherstellen",
+            "Mindest-Kontrast-Verhältnis 3:1 für großen Text verwenden",
+            "Kontrast mit Verifizierungs-Tools testen",
+            "Benutzer mit Farbsehschwächen berücksichtigen",
+            "Hohe Kontrast-Optionen bereitstellen"
+          ]
+        }
+      }
     }
   },
   "reports": {

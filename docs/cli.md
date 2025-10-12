@@ -66,8 +66,21 @@ npx vibealive seo-scan <path>
 # Performance analysis
 npx vibealive perf-scan <path>
 
-# Accessibility audit
+# WCAG 2.2 Accessibility Audit
 npx vibealive a11y-scan <path>
+
+Performs a comprehensive accessibility audit based on WCAG 2.2 guidelines including:
+
+- **Image Accessibility**: Alt text validation, decorative image handling
+- **Semantic HTML**: Proper heading hierarchy, landmark usage, table structure
+- **ARIA Implementation**: Labels, roles, properties, live regions
+- **Keyboard Navigation**: Focus management, tab order, keyboard shortcuts
+- **Color & Contrast**: Minimum contrast ratios, color-only information
+- **Form Accessibility**: Labels, input purpose, error handling
+- **Focus Management**: Visible indicators, focus not obscured (new in WCAG 2.2)
+- **Motion & Interaction**: Reduced motion, pointer gestures, drag alternatives
+- **Authentication**: Accessible auth methods (new in WCAG 2.2)
+- **Next.js Specific**: Image component usage, Link components, metadata
 
 # Advanced Next.js patterns detection
 npx vibealive patterns <path>

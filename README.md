@@ -26,7 +26,7 @@ npx vibealive serve --stdio
 - **Multiple Formats**: Generates JSON, Markdown, and other report formats
 - **MCP Integration**: Built-in Model Context Protocol server for IDE/LLM integration
 - **Build Integration**: Webpack plugin and CI/CD pipeline support
-- **Focused Scans**: Specialized analysis for themes, SEO, performance, and accessibility
+- **Focused Scans**: Specialized analysis for themes, SEO, performance, and comprehensive WCAG 2.2 accessibility compliance
 - **Internationalization**: Multi-language support with community translations
 
 ## Installation

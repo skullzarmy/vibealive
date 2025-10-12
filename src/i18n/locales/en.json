@@ -50,6 +50,267 @@
       "unsupportedFormat": "Unsupported format: {{format}}",
       "invalidFormats": "Invalid format: {{formats}}. Valid formats: {{validFormats}}",
       "portMustBeNumber": "Port must be a number."
+    },
+    "accessibility": {
+      "title": "♿ WCAG 2.2 Accessibility Audit",
+      "description": "Comprehensive WCAG 2.2 accessibility audit including alt text, ARIA labels, keyboard navigation, color contrast, focus management, and Next.js specific patterns",
+      "starting": "♿ Running comprehensive WCAG 2.2 accessibility audit...",
+      "completed": "♿ WCAG 2.2 accessibility audit completed in {{time}} ms",
+      "failed": "❌ WCAG 2.2 accessibility audit failed:",
+      "issues": {
+        "missingAltText": {
+          "title": "Missing Alt Text (WCAG 2.2: 1.1.1)",
+          "description": "Images found without proper alt attributes. This prevents screen readers from describing images to users.",
+          "recommendations": [
+            "Add descriptive alt attributes to all meaningful images",
+            "Use alt=\"\" for purely decorative images",
+            "For Next.js, use the Image component with proper alt props",
+            "Consider using aria-label for complex images",
+            "Ensure alt text describes the image content and context"
+          ]
+        },
+        "improperHeadingOrder": {
+          "title": "Improper Heading Structure (WCAG 2.2: 1.3.1)",
+          "description": "Heading hierarchy is not properly maintained, making content structure unclear for screen readers.",
+          "recommendations": [
+            "Use headings in sequential order (h1, h2, h3, etc.)",
+            "Ensure each page has one h1 element",
+            "Do not skip heading levels",
+            "Use headings to structure content, not just for styling",
+            "Consider using aria-labelledby for complex heading relationships"
+          ]
+        },
+        "missingHeadingStructure": {
+          "title": "Missing Heading Structure (WCAG 2.2: 1.3.1)",
+          "description": "Pages missing proper heading structure, affecting content navigation for assistive technologies.",
+          "recommendations": [
+            "Add h1 element to identify main page content",
+            "Use heading hierarchy to structure content sections",
+            "Ensure headings are descriptive and meaningful",
+            "Use semantic HTML elements alongside headings"
+          ]
+        },
+        "inaccessibleForms": {
+          "title": "Inaccessible Form Elements (WCAG 2.2: 1.3.1, 1.3.5, 3.3.7)",
+          "description": "Form inputs lacking proper labels, autocomplete attributes, or accessible names.",
+          "recommendations": [
+            "Associate every input with a descriptive label",
+            "Use aria-label or aria-labelledby when visual labels are not possible",
+            "Add autocomplete attributes to identify input purpose",
+            "Provide clear error messages with aria-describedby",
+            "Group related inputs with fieldset and legend",
+            "Implement proper form validation feedback"
+          ]
+        },
+        "keyboardNavigation": {
+          "title": "Keyboard Navigation Issues (WCAG 2.2: 2.1.1, 2.1.4, 2.5.1)",
+          "description": "Interactive elements not accessible via keyboard or missing proper focus management.",
+          "recommendations": [
+            "Ensure all interactive elements are keyboard accessible",
+            "Add keyboard event handlers alongside mouse events",
+            "Use proper semantic HTML elements (button, a, input)",
+            "Implement logical tab order with tabindex if needed",
+            "Provide visible focus indicators",
+            "Add single-pointer alternatives for complex gestures",
+            "Implement escape mechanisms for triggered content"
+          ]
+        },
+        "missingFocusIndicators": {
+          "title": "Missing Focus Indicators (WCAG 2.2: 2.4.7, 2.4.11)",
+          "description": "Interactive elements lack visible focus indicators or focus may be obscured.",
+          "recommendations": [
+            "Provide clear focus indicators for all interactive elements",
+            "Use :focus-visible for modern focus management",
+            "Ensure focus indicators have sufficient contrast (3:1 minimum)",
+            "Avoid removing default focus styles without replacement",
+            "Ensure focused elements are not obscured by sticky/fixed content",
+            "Test focus visibility across different browsers"
+          ]
+        },
+        "autoplayMedia": {
+          "title": "Autoplay Media Issues (WCAG 2.2: 2.2.2)",
+          "description": "Media content autoplays without user control, which can be disorienting or distracting.",
+          "recommendations": [
+            "Provide controls for auto-playing media",
+            "Allow users to pause, stop, or hide moving content",
+            "Limit autoplay duration to 5 seconds or less",
+            "Provide clear controls for carousels and sliders",
+            "Consider prefers-reduced-motion media query"
+          ]
+        },
+        "missingSkipLinks": {
+          "title": "Missing Skip Links (WCAG 2.2: 2.4.1)",
+          "description": "No skip links found to help keyboard users bypass repetitive content.",
+          "recommendations": [
+            "Add \"Skip to main content\" link at the beginning of pages",
+            "Include skip links for navigation and other repetitive blocks",
+            "Ensure skip links are keyboard accessible",
+            "Make skip links visible on focus or always visible",
+            "Test skip link functionality with keyboard navigation"
+          ]
+        },
+        "missingPageTitles": {
+          "title": "Missing Page Titles (WCAG 2.2: 2.4.2)",
+          "description": "Pages lack proper titles, making navigation difficult for screen reader users.",
+          "recommendations": [
+            "Add unique, descriptive titles to all pages",
+            "Use Next.js Head component or metadata API",
+            "Include page hierarchy in titles (e.g., \"Page - Section - Site\")",
+            "Keep titles concise but informative",
+            "Update titles dynamically for single-page applications"
+          ]
+        },
+        "inaccessibleLinks": {
+          "title": "Inaccessible Link Text (WCAG 2.2: 2.4.4)",
+          "description": "Links with vague or missing accessible names make navigation unclear.",
+          "recommendations": [
+            "Use descriptive link text that explains the destination",
+            "Avoid generic text like \"click here\" or \"read more\"",
+            "Provide context with aria-label or aria-describedby when needed",
+            "Ensure link purpose is clear from the text alone",
+            "Use Next.js Link component for internal navigation"
+          ]
+        },
+        "missingAriaLabels": {
+          "title": "Missing ARIA Labels (WCAG 2.2: 4.1.2, 2.5.3)",
+          "description": "Custom controls lack proper ARIA labels or accessible names.",
+          "recommendations": [
+            "Add aria-label or aria-labelledby to custom controls",
+            "Ensure visible label text matches accessible name",
+            "Use semantic HTML elements when possible",
+            "Provide role attributes for custom widgets",
+            "Test with screen readers to verify accessible names"
+          ]
+        },
+        "lowContrastColors": {
+          "title": "Potential Color Contrast Issues (WCAG 2.2: 1.4.3, 1.4.11)",
+          "description": "Color combinations may not meet minimum contrast requirements.",
+          "recommendations": [
+            "Test color contrast ratios (4.5:1 for normal text, 3:1 for large text)",
+            "Use online contrast checkers to verify compliance",
+            "Ensure non-text elements have 3:1 contrast with background",
+            "Do not rely solely on color to convey information",
+            "Consider dark mode and high contrast alternatives"
+          ]
+        },
+        "missingLanguageAttributes": {
+          "title": "Missing Language Attributes (WCAG 2.2: 3.1.1)",
+          "description": "Page language not specified, affecting screen reader pronunciation.",
+          "recommendations": [
+            "Add lang attribute to html element",
+            "Use locale configuration in Next.js for internationalization",
+            "Specify language changes within content using lang attribute",
+            "Ensure language codes follow BCP 47 standard"
+          ]
+        },
+        "missingLiveRegions": {
+          "title": "Missing Live Regions (WCAG 2.2: 4.1.3)",
+          "description": "Status messages and dynamic content updates not announced to screen readers.",
+          "recommendations": [
+            "Use aria-live for dynamic content updates",
+            "Implement role=\"alert\" for important messages",
+            "Use role=\"status\" for less critical updates",
+            "Consider aria-atomic for complete message updates",
+            "Test status announcements with screen readers"
+          ]
+        },
+        "dragDropWithoutAlternatives": {
+          "title": "Drag-Drop Without Alternatives (WCAG 2.2: 2.5.7)",
+          "description": "Drag and drop functionality lacks single-pointer alternatives.",
+          "recommendations": [
+            "Provide keyboard-accessible alternatives to drag-drop",
+            "Add buttons for reordering or moving items",
+            "Implement arrow key navigation for sortable lists",
+            "Use semantic markup with proper ARIA roles",
+            "Test functionality with keyboard and assistive technologies"
+          ]
+        },
+        "authenticationComplexity": {
+          "title": "Complex Authentication (WCAG 2.2: 3.3.8)",
+          "description": "Authentication methods may be too complex for users with cognitive disabilities.",
+          "recommendations": [
+            "Provide alternatives to cognitive function tests",
+            "Support password managers and autocomplete",
+            "Offer multiple authentication methods",
+            "Allow copy/paste in password fields",
+            "Provide clear instructions and help text",
+            "Consider biometric or token-based authentication"
+          ]
+        },
+        "improperTableStructure": {
+          "title": "Improper Table Structure (WCAG 2.2: 1.3.1)",
+          "description": "Tables lack proper headers, captions, or semantic structure for assistive technologies.",
+          "recommendations": [
+            "Add table headers using <th> elements",
+            "Include a descriptive <caption> for complex tables",
+            "Use scope attribute on headers for clarity",
+            "Consider using <thead>, <tbody>, and <tfoot> for structure",
+            "Ensure data tables are not used for layout"
+          ]
+        },
+        "missingButtonLabels": {
+          "title": "Missing Button Labels (WCAG 2.2: 1.1.1, 4.1.2)",
+          "description": "Buttons contain only icons or images without accessible labels.",
+          "recommendations": [
+            "Add aria-label attribute to icon-only buttons",
+            "Use aria-labelledby to reference visible text",
+            "Include visually hidden text for screen readers",
+            "Ensure button purpose is clear to all users",
+            "Test with screen readers to verify button descriptions"
+          ]
+        },
+        "missingAccessibilityTools": {
+          "title": "Missing Accessibility Tools",
+          "description": "No accessibility testing or linting tools detected in project dependencies.",
+          "recommendations": [
+            "Install eslint-plugin-jsx-a11y for accessibility linting",
+            "Add @axe-core/react for runtime accessibility testing",
+            "Include @testing-library/jest-dom for accessibility assertions",
+            "Configure automated accessibility testing in CI/CD",
+            "Consider using react-axe for development"
+          ]
+        },
+        "missingInternationalization": {
+          "title": "Missing Internationalization",
+          "description": "No internationalization setup detected, which is important for global accessibility.",
+          "recommendations": [
+            "Consider adding next-intl or react-intl for internationalization",
+            "Set up proper language attributes and locale handling",
+            "Plan for right-to-left (RTL) language support",
+            "Configure date, number, and currency formatting"
+          ]
+        },
+        "globalFocusOutlineRemoval": {
+          "title": "Global Focus Outline Removal",
+          "description": "Global CSS removes focus outlines, which are essential for keyboard navigation.",
+          "recommendations": [
+            "Provide alternative focus indicators when removing outlines",
+            "Use :focus-visible for modern focus management",
+            "Ensure focus indicators meet contrast requirements",
+            "Test keyboard navigation thoroughly"
+          ]
+        },
+        "missingMotionPreferences": {
+          "title": "Missing Motion Preferences",
+          "description": "Animations detected without respecting user motion preferences.",
+          "recommendations": [
+            "Use prefers-reduced-motion media query",
+            "Provide options to disable animations",
+            "Limit parallax and auto-playing effects",
+            "Respect user system preferences"
+          ]
+        },
+        "missingColorSchemePreferences": {
+          "title": "Missing Color Scheme Preferences",
+          "description": "Dark mode styles detected without respecting user color scheme preferences.",
+          "recommendations": [
+            "Use prefers-color-scheme media query",
+            "Ensure proper contrast in all color schemes",
+            "Test with high contrast mode",
+            "Provide manual theme toggle as backup"
+          ]
+        }
+      }
     }
   },
   "reports": {
