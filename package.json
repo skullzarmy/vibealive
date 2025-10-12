@@ -1,6 +1,6 @@
 {
   "name": "vibealive",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Universal Next.js code analysis tool to identify unused files, dead code, and redundant API endpoints with advanced pattern detection and project health scoring",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
