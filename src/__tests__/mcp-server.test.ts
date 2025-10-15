@@ -1,8 +1,9 @@
 // import { McpServer } from '../mcp/server';
 // import { JobManager } from '../mcp/job-manager';
 // import { startMCPServerHTTP } from '../mcp/server';
+import * as path from 'node:path';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+
 // import { Server } from 'http';
 
 describe('MCP Server', () => {

@@ -1,18 +1,18 @@
 // src/mcp/server.ts
+import { randomUUID } from 'node:crypto';
+import type { Server } from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
 import chalk from 'chalk';
-import express from 'express';
 import cors from 'cors';
-import { randomUUID } from 'crypto';
-import { Server } from 'http';
-import { JobManager } from './job-manager';
+import express from 'express';
+import { z } from 'zod';
 import { NextJSAnalyzer } from '../analyzer';
-import { AnalysisConfig } from '../types';
+import type { AnalysisConfig } from '../types';
+import { JobManager } from './job-manager';
 
 const jobManager = new JobManager();
 

@@ -1,25 +1,86 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
-import * as path from 'path';
-import * as fs from 'fs-extra';
-import * as readline from 'readline';
+import * as path from 'node:path';
+import * as readline from 'node:readline';
 import chalk from 'chalk';
+import { Command } from 'commander';
+import * as fs from 'fs-extra';
 import ora from 'ora';
-import { NextJSAnalyzer } from './analyzer';
-import { ConfigLoader } from './config/config-loader';
-import { ReportGenerator } from './generators/report-generator';
-import type { CLIOptions, OutputFormat, AnalysisConfig, Locale } from './types';
 import packageJson from '../package.json';
-import { startMCPServerStdio, startMCPServerHTTP } from './mcp/server';
-import {
-  t,
-  tSync,
-  setLocale,
-  preloadLocale,
-  getLocale,
-  isLocaleSupported,
-} from './i18n/utils/i18n';
+import { NextJSAnalyzer } from './analyzer';
+import { generateSampleConfig, loadConfig } from './config/config-loader';
+import { ReportGenerator } from './generators/report-generator';
+import { getLocale, isLocaleSupported, preloadLocale, setLocale, tSync } from './i18n/utils/i18n';
+import { startMCPServerHTTP, startMCPServerStdio } from './mcp/server';
+import type { AnalysisConfig, CLIOptions, Locale, OutputFormat } from './types';
+
+interface AnalyzeOptions {
+  format: OutputFormat[];
+  output: string;
+  exclude?: string[];
+  include?: string[];
+  confidenceThreshold: number;
+  generateGraph: boolean;
+  plugins?: string[];
+  verbose: boolean;
+  dryRun: boolean;
+  force: boolean;
+  ci: boolean;
+  failOnIssues: boolean;
+  maxIssues: number;
+  silent: boolean;
+  exitCodeUnused: number;
+  exitCodeDeadCode: number;
+  exitCodeApiUnused: number;
+}
+
+interface InitOptions {
+  force: boolean;
+}
+
+interface CleanupOptions {
+  force: boolean;
+}
+
+interface ServeOptions {
+  port: string;
+  stdio: boolean;
+}
+
+interface FileCheckOptions {
+  format: OutputFormat[];
+  output: string;
+  verbose: boolean;
+  confidenceThreshold: number;
+}
+
+interface DirectoryScanOptions {
+  format: OutputFormat[];
+  output: string;
+  recursive: boolean;
+  exclude?: string[];
+  confidenceThreshold: number;
+  verbose: boolean;
+}
+
+interface ComponentScanOptions {
+  format: OutputFormat[];
+  output: string;
+  maxDepth: number;
+  types: boolean;
+  styles: boolean;
+  verbose: boolean;
+  confidenceThreshold: number;
+}
+
+interface ApiScanOptions {
+  format: OutputFormat[];
+  output: string;
+  middleware: boolean;
+  usageCheck: boolean;
+  verbose: boolean;
+  confidenceThreshold: number;
+}
 
 const program = new Command();
 
@@ -27,7 +88,7 @@ const program = new Command();
 (async () => {
   try {
     await preloadLocale('en');
-  } catch (error) {
+  } catch (_error) {
     // Continue even if locale loading fails
   }
 })();
@@ -49,7 +110,7 @@ program.hook('preAction', async (thisCommand) => {
     setLocale(opts.locale as Locale);
     try {
       await preloadLocale(opts.locale as Locale);
-    } catch (error) {
+    } catch (_error) {
       // Fallback to English if locale loading fails
       await preloadLocale('en');
     }
@@ -57,7 +118,7 @@ program.hook('preAction', async (thisCommand) => {
     // Default to English and preload it
     try {
       await preloadLocale('en');
-    } catch (error) {
+    } catch (_error) {
       // If even English fails, continue without localization
     }
   }
@@ -100,7 +161,7 @@ program
   .option('--exit-code-unused <number>', 'Exit code for unused files found', parseInt, 1)
   .option('--exit-code-dead-code <number>', 'Exit code for dead code found', parseInt, 2)
   .option('--exit-code-api-unused <number>', 'Exit code for unused APIs found', parseInt, 3)
-  .action(async (projectPath: string, options: any) => {
+  .action(async (projectPath: string, options: AnalyzeOptions) => {
     try {
       await runAnalysis(projectPath, options);
     } catch (error) {
@@ -113,7 +174,7 @@ program
   .command('init')
   .description('Initialize a new .vibealive.config.js file')
   .option('-f, --force', 'Overwrite existing config file')
-  .action(async (options: any) => {
+  .action(async (options: InitOptions) => {
     try {
       await initConfig(options);
     } catch (error) {
@@ -126,7 +187,7 @@ program
   .command('cleanup')
   .description('Remove VibeAlive configuration files and cleanup')
   .option('-f, --force', 'Force removal without confirmation')
-  .action(async (options: any) => {
+  .action(async (options: CleanupOptions) => {
     try {
       await cleanupConfig(options);
     } catch (error) {
@@ -140,7 +201,7 @@ program
   .description('Start the MCP server to interact with the analysis engine')
   .option('-p, --port <number>', 'Port to run the server on (HTTP mode)', '8080')
   .option('--stdio', 'Use stdio transport instead of HTTP (for direct MCP client integration)')
-  .action(async (options: any) => {
+  .action(async (options: ServeOptions) => {
     try {
       if (options.stdio) {
         // Use stdio transport for direct MCP client connections
@@ -148,7 +209,7 @@ program
       } else {
         // Use HTTP transport for remote connections
         const port = parseInt(options.port, 10);
-        if (isNaN(port)) {
+        if (Number.isNaN(port)) {
           throw new Error(tSync('cli.validation.portMustBeNumber'));
         }
         startMCPServerHTTP(port);
@@ -167,7 +228,7 @@ program
   .option('-f, --format <formats>', 'Output formats (json,md,tsv,csv)', parseFormats, ['json'])
   .option('-o, --output <dir>', 'Output directory for reports', './.vibealive/analysis-results')
   .option('-v, --verbose', 'Verbose output')
-  .action(async (filePath: string, projectPath: string, options: any) => {
+  .action(async (filePath: string, projectPath: string, options: FileCheckOptions) => {
     try {
       await runFileCheck(projectPath, filePath, options);
     } catch (error) {
@@ -196,7 +257,7 @@ program
     80
   )
   .option('-v, --verbose', 'Verbose output')
-  .action(async (directoryPath: string, projectPath: string, options: any) => {
+  .action(async (directoryPath: string, projectPath: string, options: DirectoryScanOptions) => {
     try {
       await runDirectoryScan(projectPath, directoryPath, options);
     } catch (error) {
@@ -216,7 +277,7 @@ program
   .option('--no-types', 'Exclude TypeScript type files')
   .option('--no-styles', 'Exclude CSS/style files')
   .option('-v, --verbose', 'Verbose output')
-  .action(async (componentPath: string, projectPath: string, options: any) => {
+  .action(async (componentPath: string, projectPath: string, options: ComponentScanOptions) => {
     try {
       await runComponentScan(projectPath, componentPath, options);
     } catch (error) {
@@ -234,7 +295,7 @@ program
   .option('--no-middleware', 'Exclude middleware files')
   .option('--no-usage-check', "Don't check if routes are actually called")
   .option('-v, --verbose', 'Verbose output')
-  .action(async (projectPath: string, options: any) => {
+  .action(async (projectPath: string, options: ApiScanOptions) => {
     try {
       await runApiScan(projectPath, options);
     } catch (error) {
@@ -436,7 +497,7 @@ async function runBundleAnalysis(
     dryRun: false,
   };
 
-  const config = await ConfigLoader.loadConfig(absoluteProjectPath, cliOptions);
+  const config = await loadConfig(absoluteProjectPath, cliOptions);
   const analyzer = new NextJSAnalyzer(config);
   const report = await analyzer.analyze();
 
@@ -475,7 +536,7 @@ async function runBundleAnalysis(
 async function runFocusedAnalysis(
   projectPath: string,
   options: { format: OutputFormat[] },
-  focus: string,
+  _focus: string,
   packageFilter: string[],
   categoryFilter: string[]
 ): Promise<void> {
@@ -493,7 +554,7 @@ async function runFocusedAnalysis(
     dryRun: false,
   };
 
-  const config = await ConfigLoader.loadConfig(absoluteProjectPath, cliOptions);
+  const config = await loadConfig(absoluteProjectPath, cliOptions);
 
   const analyzer = new NextJSAnalyzer(config);
   const report = await analyzer.analyze();
@@ -547,7 +608,7 @@ async function validateNextProject(projectPath: string): Promise<void> {
   }
 }
 
-async function runAnalysis(projectPath: string, options: any): Promise<void> {
+async function runAnalysis(projectPath: string, options: AnalyzeOptions): Promise<void> {
   const absoluteProjectPath = path.resolve(projectPath);
 
   await validateNextProject(absoluteProjectPath);
@@ -588,7 +649,7 @@ async function runAnalysis(projectPath: string, options: any): Promise<void> {
       dryRun: options.dryRun,
     };
 
-    const config = await ConfigLoader.loadConfig(absoluteProjectPath, cliOptions);
+    const config = await loadConfig(absoluteProjectPath, cliOptions);
 
     if (options.verbose) {
       spinner.info(`Configuration loaded:`);
@@ -708,7 +769,11 @@ async function runAnalysis(projectPath: string, options: any): Promise<void> {
   }
 }
 
-async function runFileCheck(projectPath: string, filePath: string, options: any): Promise<void> {
+async function runFileCheck(
+  projectPath: string,
+  filePath: string,
+  options: FileCheckOptions
+): Promise<void> {
   const absoluteProjectPath = path.resolve(projectPath);
   await validateNextProject(absoluteProjectPath);
 
@@ -780,7 +845,7 @@ async function runFileCheck(projectPath: string, filePath: string, options: any)
 async function runDirectoryScan(
   projectPath: string,
   directoryPath: string,
-  options: any
+  options: DirectoryScanOptions
 ): Promise<void> {
   const absoluteProjectPath = path.resolve(projectPath);
   await validateNextProject(absoluteProjectPath);
@@ -837,7 +902,7 @@ async function runDirectoryScan(
 async function runComponentScan(
   projectPath: string,
   componentPath: string,
-  options: any
+  options: ComponentScanOptions
 ): Promise<void> {
   const absoluteProjectPath = path.resolve(projectPath);
   await validateNextProject(absoluteProjectPath);
@@ -917,7 +982,7 @@ async function runComponentScan(
   }
 }
 
-async function runApiScan(projectPath: string, options: any): Promise<void> {
+async function runApiScan(projectPath: string, options: ApiScanOptions): Promise<void> {
   const absoluteProjectPath = path.resolve(projectPath);
   await validateNextProject(absoluteProjectPath);
 
@@ -1003,7 +1068,7 @@ async function runApiScan(projectPath: string, options: any): Promise<void> {
   }
 }
 
-async function initConfig(options: any): Promise<void> {
+async function initConfig(options: InitOptions): Promise<void> {
   const vibeAliveDir = path.join(process.cwd(), '.vibealive');
   const configPath = path.join(vibeAliveDir, 'config.js');
   const gitignorePath = path.join(process.cwd(), '.gitignore');
@@ -1028,7 +1093,7 @@ async function initConfig(options: any): Promise<void> {
 
   // Create or overwrite the config file
   await fs.ensureDir(vibeAliveDir); // Ensure .vibealive directory exists
-  const configContent = ConfigLoader.generateSampleConfig();
+  const configContent = generateSampleConfig();
   await fs.writeFile(configPath, configContent);
 
   if (configExists) {
@@ -1110,7 +1175,7 @@ async function initConfig(options: any): Promise<void> {
   console.log(chalk.gray(tSync('cli.config.runAnalyze')));
 }
 
-async function cleanupConfig(options: any): Promise<void> {
+async function cleanupConfig(options: CleanupOptions): Promise<void> {
   const vibeAliveDir = path.join(process.cwd(), '.vibealive');
 
   // Check what exists
@@ -1211,7 +1276,7 @@ function formatBytes(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 function promptUser(question: string): Promise<string> {

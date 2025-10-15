@@ -1,9 +1,9 @@
-import { ConfigLoader } from '../config/config-loader';
-import { OutputFormat } from '../types';
+import * as path from 'node:path';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+import { loadConfig, extractNextVersion } from '../config/config-loader';
+import type { OutputFormat } from '../types';
 
-describe('ConfigLoader', () => {
+describe('config-loader', () => {
   let testProjectCounter = 0;
 
   const getTestProjectPath = () => {
@@ -41,7 +41,7 @@ describe('ConfigLoader', () => {
 
       await fs.ensureDir(path.join(currentTestProjectPath, 'app'));
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.projectRoot).toBe(currentTestProjectPath);
       expect(config.nextVersion).toBe('14.0.0');
@@ -70,7 +70,7 @@ describe('ConfigLoader', () => {
 
       await fs.ensureDir(path.join(currentTestProjectPath, 'app'));
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.typescript).toBe(true);
     });
@@ -86,7 +86,7 @@ describe('ConfigLoader', () => {
 
       await fs.ensureDir(path.join(currentTestProjectPath, 'pages'));
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.routerType).toBe('pages');
       expect(config.nextVersion).toBe('12.0.0');
@@ -104,7 +104,7 @@ describe('ConfigLoader', () => {
       await fs.ensureDir(path.join(currentTestProjectPath, 'app'));
       await fs.ensureDir(path.join(currentTestProjectPath, 'pages'));
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.routerType).toBe('hybrid');
     });
@@ -130,7 +130,7 @@ describe('ConfigLoader', () => {
         };`
       );
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.excludePatterns).toContain('**/custom-exclude/**');
       expect(config.confidenceThreshold).toBe(95);
@@ -156,7 +156,7 @@ describe('ConfigLoader', () => {
         };`
       );
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       expect(config.excludePatterns).toContain('**/legacy/**');
       expect(config.plugins).toContain('custom-plugin');
@@ -190,7 +190,7 @@ describe('ConfigLoader', () => {
         };`
       );
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
 
       // Should use .vibealive.config.js settings
       expect(config.excludePatterns).toContain('**/exclude1/**');
@@ -201,9 +201,7 @@ describe('ConfigLoader', () => {
     });
 
     it('should handle missing package.json', async () => {
-      await expect(ConfigLoader.loadConfig(currentTestProjectPath)).rejects.toThrow(
-        'package.json not found'
-      );
+      await expect(loadConfig(currentTestProjectPath)).rejects.toThrow('package.json not found');
     });
 
     it('should handle non-Next.js projects', async () => {
@@ -214,7 +212,7 @@ describe('ConfigLoader', () => {
         },
       });
 
-      await expect(ConfigLoader.loadConfig(currentTestProjectPath)).rejects.toThrow(
+      await expect(loadConfig(currentTestProjectPath)).rejects.toThrow(
         'Next.js not found in dependencies'
       );
     });
@@ -228,7 +226,7 @@ describe('ConfigLoader', () => {
         },
       });
 
-      await expect(ConfigLoader.loadConfig(currentTestProjectPath)).rejects.toThrow(
+      await expect(loadConfig(currentTestProjectPath)).rejects.toThrow(
         'Neither app/ nor pages/ directory found'
       );
     });
@@ -250,7 +248,7 @@ describe('ConfigLoader', () => {
         format: ['md'] as OutputFormat[],
       };
 
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath, overrides);
+      const config = await loadConfig(currentTestProjectPath, overrides);
 
       expect(config.confidenceThreshold).toBe(85);
       expect(config.excludePatterns).toContain('**/override/**');
@@ -266,7 +264,7 @@ describe('ConfigLoader', () => {
         },
       };
 
-      const version = (ConfigLoader as any).extractNextVersion(packageJson);
+      const version = extractNextVersion(packageJson);
       expect(version).toBe('14.0.0');
     });
 
@@ -277,7 +275,7 @@ describe('ConfigLoader', () => {
         },
       };
 
-      const version = (ConfigLoader as any).extractNextVersion(packageJson);
+      const version = extractNextVersion(packageJson);
       expect(version).toBe('13.5.0');
     });
 
@@ -288,7 +286,7 @@ describe('ConfigLoader', () => {
         },
       };
 
-      const version = (ConfigLoader as any).extractNextVersion(packageJson);
+      const version = extractNextVersion(packageJson);
       expect(version).toBe('>=14.0.0');
     });
 
@@ -299,7 +297,7 @@ describe('ConfigLoader', () => {
         },
       };
 
-      const version = (ConfigLoader as any).extractNextVersion(packageJson);
+      const version = extractNextVersion(packageJson);
       expect(version).toBeNull();
     });
   });
@@ -326,7 +324,7 @@ describe('ConfigLoader', () => {
       );
 
       // Should not throw but should log warning and continue with defaults
-      const config = await ConfigLoader.loadConfig(currentTestProjectPath);
+      const config = await loadConfig(currentTestProjectPath);
       expect(config.projectRoot).toBe(currentTestProjectPath);
     });
   });

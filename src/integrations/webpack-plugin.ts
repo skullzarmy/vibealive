@@ -1,5 +1,5 @@
 import { NextJSAnalyzer } from '../analyzer';
-import { ConfigLoader } from '../config/config-loader';
+import { loadConfig } from '../config/config-loader';
 import { ReportGenerator } from '../generators/report-generator';
 import type { AnalysisConfig, OutputFormat, FileAnalysis, APIEndpoint } from '../types';
 
@@ -73,7 +73,7 @@ export class VibeAliveWebpackPlugin {
           const projectPath = this.options.projectPath || compiler.context;
 
           // Load configuration
-          const config = await ConfigLoader.loadConfig(projectPath);
+          const config = await loadConfig(projectPath);
 
           // Override with plugin options
           const analysisConfig: AnalysisConfig = {
