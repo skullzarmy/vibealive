@@ -969,13 +969,6 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             ].includes(pkg.name)
           ) || [];
 
-        const result = {
-          themePackages: themeAnalysis,
-          patterns: report.nextjsAnalysis?.patterns || [],
-          recommendations: themeAnalysis.flatMap((pkg) => pkg.recommendations),
-          projectHealth: report.nextjsAnalysis?.projectHealth,
-        };
-
         // Create a modified report with theme analysis results
         const themeReport = { ...report };
         if (themeReport.nextjsAnalysis) {
@@ -1044,16 +1037,6 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
 
         const seoIssues =
           report.nextjsAnalysis?.setupIssues.filter((issue) => issue.category === 'seo') || [];
-
-        const result = {
-          seoPackages,
-          seoIssues,
-          recommendations: [
-            ...seoPackages.flatMap((pkg) => pkg.recommendations),
-            ...seoIssues.flatMap((issue) => issue.recommendations),
-          ],
-          projectHealth: report.nextjsAnalysis?.projectHealth,
-        };
 
         // Create a modified report with SEO analysis results
         const seoReport = { ...report };
@@ -1276,13 +1259,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           .describe('Include detailed recommendations (default: true)'),
       },
     },
-    async ({
-      projectPath,
-      includeRecommendations = true,
-    }: {
-      projectPath: string;
-      includeRecommendations?: boolean;
-    }) => {
+    async ({ projectPath }: { projectPath: string; includeRecommendations?: boolean }) => {
       const job = jobManager.createJob();
 
       try {
@@ -1438,7 +1415,7 @@ export function startMCPServerHTTP(port: number): Server {
   });
 
   // Legacy SSE endpoint for backwards compatibility with older clients
-  app.get('/sse', async (req, res) => {
+  app.get('/sse', async (_req, res) => {
     try {
       console.log(chalk.yellow(tSync('mcp.server.clientConnecting')));
 
