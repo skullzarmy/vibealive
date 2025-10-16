@@ -390,6 +390,107 @@
       "clientConnecting": "📡 Veralteter SSE-Client verbindet sich (veraltet)",
       "startingStdio": "🚀 Starte MCP-Server mit stdio-Transport...",
       "readyStdio": "✅ MCP-Server bereit auf stdio-Transport"
+    },
+    "tools": {
+      "analyzeProject": {
+        "title": "Next.js-Projekt Analysieren",
+        "description": "Startet eine vollständige, asynchrone Analyse eines Next.js-Projekts zur Identifizierung ungenutzten Codes, toter Komponenten und redundanter API-Endpunkte.",
+        "starting": "Starte Analyse...",
+        "started": "Analyse gestartet für Projekt: {{projectPath}}\\nJob-ID: {{jobId}}\\nStatus: {{status}}\\n\\nVerwenden Sie das get-job-status Tool, um den Fortschritt zu überprüfen.",
+        "error": "Fehler beim Starten der Analyse: {{error}}"
+      },
+      "getJobStatus": {
+        "title": "Analyse-Job-Status Abrufen",
+        "description": "Überprüft den Status eines Analyse-Jobs anhand der Job-ID.",
+        "jobNotFound": "Job nicht gefunden: {{jobId}}",
+        "error": "Fehler beim Abrufen des Job-Status: {{error}}"
+      },
+      "getAnalysisReport": {
+        "title": "Analysebericht Abrufen",
+        "description": "Ruft den vollständigen Analysebericht für einen abgeschlossenen Job ab.",
+        "jobNotFound": "Job nicht gefunden: {{jobId}}",
+        "jobNotComplete": "Job ist nicht abgeschlossen oder hat kein Ergebnis. Status: {{status}}",
+        "error": "Fehler beim Abrufen des Analyseberichts: {{error}}"
+      },
+      "getFileDetails": {
+        "title": "Datei-Analysedetails Abrufen",
+        "description": "Ruft detaillierte Analyse für eine spezifische Datei aus einer abgeschlossenen Analyse ab.",
+        "jobNotFound": "Job nicht gefunden oder nicht abgeschlossen: {{jobId}}",
+        "fileNotFound": "Datei nicht in Analyse gefunden: {{filePath}}",
+        "error": "Fehler beim Abrufen der Dateidetails: {{error}}"
+      },
+      "checkFile": {
+        "title": "Einzelne Datei-Nutzung Überprüfen",
+        "description": "Überprüft schnell, ob eine spezifische Datei im Projekt verwendet wird, ohne eine vollständige Analyse durchzuführen.",
+        "checking": "Überprüfe Datei: {{filePath}}",
+        "started": "Dateiüberprüfung gestartet: {{filePath}}\\nJob-ID: {{jobId}}\\n\\nVerwenden Sie get-job-status und get-analysis-report, um Ergebnisse zu erhalten.",
+        "fileNotFound": "Datei nicht gefunden: {{filePath}}",
+        "error": "Fehler beim Überprüfen der Datei: {{error}}"
+      },
+      "scanDirectory": {
+        "title": "Verzeichnis Scannen",
+        "description": "Analysiert Dateien innerhalb eines spezifischen Verzeichnisses und seiner Unterverzeichnisse.",
+        "scanning": "Scanne Verzeichnis: {{directoryPath}}",
+        "started": "Verzeichnisscan gestartet: {{directoryPath}}\\nRekursiv: {{recursive}}\\nJob-ID: {{jobId}}\\n\\nVerwenden Sie get-job-status und get-analysis-report, um Ergebnisse zu erhalten.",
+        "error": "Fehler beim Scannen des Verzeichnisses: {{error}}"
+      },
+      "scanComponentTree": {
+        "title": "Komponentenbaum Scannen",
+        "description": "Analysiert eine Komponente und alle ihre Abhängigkeiten, um zu sehen, was betroffen wäre, wenn sie entfernt würde.",
+        "analyzing": "Analysiere Komponentenbaum: {{componentPath}}",
+        "componentNotFound": "Komponente nicht gefunden: {{componentPath}}",
+        "started": "Komponentenbaum-Analyse gestartet: {{componentPath}}\\nMaximale Tiefe: {{maxDepth}}\\nJob-ID: {{jobId}}\\n\\nVerwenden Sie get-job-status und get-analysis-report, um Ergebnisse zu erhalten.",
+        "error": "Fehler beim Analysieren des Komponentenbaums: {{error}}"
+      },
+      "scanApiRoutes": {
+        "title": "API-Routen Scannen",
+        "description": "Analysiert nur API-Routen zur Identifizierung ungenutzter Endpunkte und ihrer Abhängigkeiten.",
+        "scanning": "Scanne API-Routen...",
+        "started": "API-Routen-Scan gestartet\\nMiddleware einschließen: {{includeMiddleware}}\\nNutzung überprüfen: {{checkUsage}}\\nJob-ID: {{jobId}}\\n\\nVerwenden Sie get-job-status und get-analysis-report, um Ergebnisse zu erhalten.",
+        "error": "Fehler beim Scannen der API-Routen: {{error}}"
+      },
+      "analyzeThemeSetup": {
+        "title": "Theme- und Styling-Setup Analysieren",
+        "description": "Analysiert Theme-Konfiguration, Dark-Mode-Setup, CSS-Frameworks und Styling-Muster im Next.js-Projekt.",
+        "analyzing": "Analysiere Theme-Setup...",
+        "completed": "Theme-Analyse abgeschlossen!\\n\\n{{packageCount}} theme-bezogene Pakete gefunden\\nGesundheitsbewertung: {{healthScore}}/100\\n\\nJob-ID: {{jobId}} - Überprüfen Sie Ergebnisse mit get-analysis-report"
+      },
+      "auditSeoSetup": {
+        "title": "SEO-Konfiguration Auditieren",
+        "description": "Umfassende SEO-Prüfung einschließlich Metadaten, Sitemap, strukturierte Daten und Social-Sharing-Setup.",
+        "auditing": "Auditiere SEO-Setup...",
+        "completed": "SEO-Audit abgeschlossen!\\n\\n{{packageCount}} SEO-bezogene Pakete gefunden\\n{{issueCount}} SEO-Probleme identifiziert\\nGesundheitsbewertung: {{healthScore}}/100\\n\\nJob-ID: {{jobId}} - Überprüfen Sie detaillierte Ergebnisse mit get-analysis-report"
+      },
+      "scanPerformanceIssues": {
+        "title": "Performance-Optimierungsmöglichkeiten Scannen",
+        "description": "Identifiziert Performance-Probleme einschließlich nicht optimierter Bilder, fehlender Ladestatus, Bundle-Größen-Probleme und Font-Optimierungsmöglichkeiten.",
+        "completed": "Performance-Scan abgeschlossen!\\n\\n{{packageCount}} performance-bezogene Pakete gefunden\\n{{issueCount}} Performance-Probleme identifiziert\\nGesundheitsbewertung: {{healthScore}}/100\\n\\nJob-ID: {{jobId}} - Überprüfen Sie detaillierte Ergebnisse mit get-analysis-report"
+      },
+      "checkAccessibility": {
+        "title": "Barrierefreiheits-Compliance Überprüfen",
+        "description": "Umfassende WCAG 2.2 Barrierefreiheits-Prüfung einschließlich Alt-Text, ARIA-Labels, Überschriftenstruktur, Tastaturnavigation, Farbkontrast, Fokusmanagement, Drag-Drop-Alternativen, Authentifizierungskomplexität und Next.js-spezifische Barrierefreiheitsmuster.",
+        "completed": "WCAG 2.2 Barrierefreiheits-Audit Abgeschlossen!\\n\\n{{issueCount}} Barrierefreiheitsprobleme in Kategorien gefunden:\\n• Alt-Text und Bild-Barrierefreiheit\\n• ARIA-Labels und semantisches HTML\\n• Tastaturnavigation und Fokusmanagement\\n• Farbkontrast und visuelles Design\\n• Formular-Barrierefreiheit und Eingabezweck\\n• Bildschirmleser-Kompatibilität\\n• Next.js-spezifische Barrierefreiheitsmuster\\n\\nProjekt-Gesundheitsbewertung: {{healthScore}}/100\\n\\nJob-ID: {{jobId}} - Überprüfen Sie detaillierte Ergebnisse mit get-analysis-report"
+      },
+      "detectNextjsPatterns": {
+        "title": "Erweiterte Next.js-Routing-Muster Erkennen",
+        "description": "Identifiziert erweiterte Next.js-Routing-Muster einschließlich Routengruppen, private Ordner, abfangende Routen, parallele Routen und dynamische Routensegmente.",
+        "completed": "Next.js-Mustererkennung abgeschlossen!\\n\\n{{patternCount}} erweiterte Routing-Muster gefunden:\\n{{patternSummary}}\\n\\nGesundheitsbewertung: {{healthScore}}/100\\n\\nJob-ID: {{jobId}} - Überprüfen Sie detaillierte Ergebnisse mit get-analysis-report"
+      },
+      "validateProjectHealth": {
+        "title": "Umfassenden Projekt-Gesundheitsbericht Generieren",
+        "description": "Bietet eine allgemeine Projekt-Gesundheitsbewertung mit detaillierter Analyse von Stärken, Verbesserungsbereichen, Paket-Konfigurationsstatus und umsetzbaren Empfehlungen.",
+        "completed": "Projekt-Gesundheitsbericht generiert! {{scoreEmoji}}\\n\\nGesamte Gesundheitsbewertung: {{score}}/100\\n\\nStärken ({{strengthCount}}):\\n{{strengths}}\\n\\nVerbesserungsbereiche ({{improvementCount}}):\\n{{improvements}}\\n\\nJob-ID: {{jobId}} - Überprüfen Sie detaillierte Ergebnisse mit get-analysis-report"
+      },
+      "getCliCommands": {
+        "title": "Verfügbare CLI-Befehle Abrufen",
+        "description": "Gibt Informationen über verfügbare CLI-Befehle und Optionen für vibealive zurück. Dies ist nur informativ - Agenten können CLI-Befehle nicht direkt ausführen."
+      }
+    },
+    "resources": {
+      "serverStatus": {
+        "title": "Server-Status",
+        "description": "Aktueller Status des VibeAlive MCP-Servers"
+      }
     }
   }
 }

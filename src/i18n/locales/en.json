@@ -419,6 +419,107 @@
       "clientConnecting": "📡 Legacy SSE client connecting (deprecated)",
       "startingStdio": "🚀 Starting MCP Server with stdio transport...",
       "readyStdio": "✅ MCP Server ready on stdio transport"
+    },
+    "tools": {
+      "analyzeProject": {
+        "title": "Analyze Next.js Project",
+        "description": "Initiates a full, asynchronous analysis of a Next.js project to identify unused code, dead components, and redundant API endpoints.",
+        "starting": "Starting analysis...",
+        "started": "Analysis started for project: {{projectPath}}\nJob ID: {{jobId}}\nStatus: {{status}}\n\nUse the get-job-status tool to check progress.",
+        "error": "Error starting analysis: {{error}}"
+      },
+      "getJobStatus": {
+        "title": "Get Analysis Job Status",
+        "description": "Checks the status of an analysis job by job ID.",
+        "jobNotFound": "Job not found: {{jobId}}",
+        "error": "Error getting job status: {{error}}"
+      },
+      "getAnalysisReport": {
+        "title": "Get Analysis Report",
+        "description": "Retrieves the full analysis report for a completed job.",
+        "jobNotFound": "Job not found: {{jobId}}",
+        "jobNotComplete": "Job is not completed or has no result. Status: {{status}}",
+        "error": "Error getting analysis report: {{error}}"
+      },
+      "getFileDetails": {
+        "title": "Get File Analysis Details",
+        "description": "Retrieves detailed analysis for a specific file from a completed analysis.",
+        "jobNotFound": "Job not found or not completed: {{jobId}}",
+        "fileNotFound": "File not found in analysis: {{filePath}}",
+        "error": "Error getting file details: {{error}}"
+      },
+      "checkFile": {
+        "title": "Check Single File Usage",
+        "description": "Quickly check if a specific file is used in the project without running a full analysis.",
+        "checking": "Checking file: {{filePath}}",
+        "started": "File check started: {{filePath}}\nJob ID: {{jobId}}\n\nUse get-job-status and get-analysis-report to get results.",
+        "fileNotFound": "File not found: {{filePath}}",
+        "error": "Error checking file: {{error}}"
+      },
+      "scanDirectory": {
+        "title": "Scan Directory",
+        "description": "Analyze files within a specific directory and its subdirectories.",
+        "scanning": "Scanning directory: {{directoryPath}}",
+        "started": "Directory scan started: {{directoryPath}}\nRecursive: {{recursive}}\nJob ID: {{jobId}}\n\nUse get-job-status and get-analysis-report to get results.",
+        "error": "Error scanning directory: {{error}}"
+      },
+      "scanComponentTree": {
+        "title": "Scan Component Tree",
+        "description": "Analyze a component and all its dependencies to see what would be affected if removed.",
+        "analyzing": "Analyzing component tree: {{componentPath}}",
+        "componentNotFound": "Component not found: {{componentPath}}",
+        "started": "Component tree analysis started: {{componentPath}}\nMax depth: {{maxDepth}}\nJob ID: {{jobId}}\n\nUse get-job-status and get-analysis-report to get results.",
+        "error": "Error analyzing component tree: {{error}}"
+      },
+      "scanApiRoutes": {
+        "title": "Scan API Routes",
+        "description": "Analyze only API routes to identify unused endpoints and their dependencies.",
+        "scanning": "Scanning API routes...",
+        "started": "API routes scan started\nInclude middleware: {{includeMiddleware}}\nCheck usage: {{checkUsage}}\nJob ID: {{jobId}}\n\nUse get-job-status and get-analysis-report to get results.",
+        "error": "Error scanning API routes: {{error}}"
+      },
+      "analyzeThemeSetup": {
+        "title": "Analyze Theme and Styling Setup",
+        "description": "Analyzes theme configuration, dark mode setup, CSS frameworks, and styling patterns in the Next.js project.",
+        "analyzing": "Analyzing theme setup...",
+        "completed": "Theme analysis completed!\n\nFound {{packageCount}} theme-related packages\nHealth Score: {{healthScore}}/100\n\nJob ID: {{jobId}} - Check results with get-analysis-report"
+      },
+      "auditSeoSetup": {
+        "title": "Audit SEO Configuration",
+        "description": "Comprehensive SEO audit including metadata, sitemap, structured data, and social sharing setup.",
+        "auditing": "Auditing SEO setup...",
+        "completed": "SEO audit completed!\n\nFound {{packageCount}} SEO-related packages\nIdentified {{issueCount}} SEO issues\nHealth Score: {{healthScore}}/100\n\nJob ID: {{jobId}} - Check detailed results with get-analysis-report"
+      },
+      "scanPerformanceIssues": {
+        "title": "Scan Performance Optimization Opportunities",
+        "description": "Identifies performance issues including unoptimized images, missing loading states, bundle size problems, and font optimization opportunities.",
+        "completed": "Performance scan completed!\n\nFound {{packageCount}} performance-related packages\nIdentified {{issueCount}} performance issues\nHealth Score: {{healthScore}}/100\n\nJob ID: {{jobId}} - Check detailed results with get-analysis-report"
+      },
+      "checkAccessibility": {
+        "title": "Check Accessibility Compliance",
+        "description": "Comprehensive WCAG 2.2 accessibility audit including alt text, ARIA labels, heading structure, keyboard navigation, color contrast, focus management, drag-drop alternatives, authentication complexity, and Next.js specific accessibility patterns.",
+        "completed": "WCAG 2.2 Accessibility Audit Completed!\n\nFound {{issueCount}} accessibility issues across categories:\n• Alt text and image accessibility\n• ARIA labels and semantic HTML\n• Keyboard navigation and focus management\n• Color contrast and visual design\n• Form accessibility and input purpose\n• Screen reader compatibility\n• Next.js specific accessibility patterns\n\nProject Health Score: {{healthScore}}/100\n\nJob ID: {{jobId}} - Check detailed results with get-analysis-report"
+      },
+      "detectNextjsPatterns": {
+        "title": "Detect Advanced Next.js Routing Patterns",
+        "description": "Identifies advanced Next.js routing patterns including route groups, private folders, intercepting routes, parallel routes, and dynamic route segments.",
+        "completed": "Next.js patterns detection completed!\n\nFound {{patternCount}} advanced routing patterns:\n{{patternSummary}}\n\nHealth Score: {{healthScore}}/100\n\nJob ID: {{jobId}} - Check detailed results with get-analysis-report"
+      },
+      "validateProjectHealth": {
+        "title": "Generate Comprehensive Project Health Report",
+        "description": "Provides an overall project health score with detailed analysis of strengths, areas for improvement, package configuration status, and actionable recommendations.",
+        "completed": "Project health report generated! {{scoreEmoji}}\n\nOverall Health Score: {{score}}/100\n\nStrengths ({{strengthCount}}):\n{{strengths}}\n\nAreas for Improvement ({{improvementCount}}):\n{{improvements}}\n\nJob ID: {{jobId}} - Check detailed results with get-analysis-report"
+      },
+      "getCliCommands": {
+        "title": "Get Available CLI Commands",
+        "description": "Returns information about available CLI commands and options for vibealive. This is informational only - agents cannot execute CLI commands directly."
+      }
+    },
+    "resources": {
+      "serverStatus": {
+        "title": "Server Status",
+        "description": "Current status of the VibeAlive MCP server"
+      }
     }
   }
 }
