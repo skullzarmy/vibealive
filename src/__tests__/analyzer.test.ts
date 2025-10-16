@@ -1,7 +1,7 @@
-import { NextJSAnalyzer } from '../analyzer';
-import { ConfigLoader } from '../config/config-loader';
+import * as path from 'node:path';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+import { NextJSAnalyzer } from '../analyzer';
+import { loadConfig } from '../config/config-loader';
 
 describe('NextJSAnalyzer', () => {
   const testProjectPath = path.join(__dirname, 'fixtures', 'test-project');
@@ -49,7 +49,7 @@ describe('NextJSAnalyzer', () => {
   });
 
   it('should detect project structure correctly', async () => {
-    const config = await ConfigLoader.loadConfig(testProjectPath);
+    const config = await loadConfig(testProjectPath);
 
     expect(config.projectRoot).toBe(testProjectPath);
     expect(config.nextVersion).toBe('14.0.0');
@@ -58,7 +58,7 @@ describe('NextJSAnalyzer', () => {
   });
 
   it('should analyze files and identify unused components', async () => {
-    const config = await ConfigLoader.loadConfig(testProjectPath);
+    const config = await loadConfig(testProjectPath);
     const analyzer = new NextJSAnalyzer(config);
 
     const report = await analyzer.analyze();
@@ -76,7 +76,7 @@ describe('NextJSAnalyzer', () => {
   });
 
   it('should identify auto-invoked files correctly', async () => {
-    const config = await ConfigLoader.loadConfig(testProjectPath);
+    const config = await loadConfig(testProjectPath);
     const analyzer = new NextJSAnalyzer(config);
 
     const report = await analyzer.analyze();

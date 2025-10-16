@@ -1,18 +1,19 @@
 // src/mcp/server.ts
+import { randomUUID } from 'node:crypto';
+import type { Server } from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
 import chalk from 'chalk';
-import express from 'express';
 import cors from 'cors';
-import { randomUUID } from 'crypto';
-import { Server } from 'http';
-import { JobManager } from './job-manager';
+import express from 'express';
+import { z } from 'zod';
 import { NextJSAnalyzer } from '../analyzer';
-import { AnalysisConfig } from '../types';
+import { tSync } from '../i18n/utils/i18n';
+import type { AnalysisConfig } from '../types';
+import { JobManager } from './job-manager';
 
 const jobManager = new JobManager();
 
@@ -40,9 +41,8 @@ function createMCPServer(): McpServer {
   server.registerTool(
     'analyze-project',
     {
-      title: 'Analyze Next.js Project',
-      description:
-        'Initiates a full, asynchronous analysis of a Next.js project to identify unused code, dead components, and redundant API endpoints.',
+      title: tSync('mcp.tools.analyzeProject.title'),
+      description: tSync('mcp.tools.analyzeProject.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
         options: z
@@ -92,8 +92,8 @@ function createMCPServer(): McpServer {
             const analyzer = new NextJSAnalyzer(config);
             const report = await analyzer.analyze();
             jobManager.completeJob(job.id, report);
-          } catch (e: any) {
-            jobManager.failJob(job.id, e.message);
+          } catch (e: unknown) {
+            jobManager.failJob(job.id, e instanceof Error ? e.message : String(e));
           }
         })();
 
@@ -101,16 +101,22 @@ function createMCPServer(): McpServer {
           content: [
             {
               type: 'text' as const,
-              text: `Analysis started for project: ${projectPath}\nJob ID: ${job.id}\nStatus: ${job.status}\n\nUse the get-job-status tool to check progress.`,
+              text: tSync('mcp.tools.analyzeProject.started', {
+                projectPath,
+                jobId: job.id,
+                status: job.status,
+              }),
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error starting analysis: ${error.message}`,
+              text: tSync('mcp.tools.analyzeProject.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -123,8 +129,8 @@ function createMCPServer(): McpServer {
   server.registerTool(
     'get-job-status',
     {
-      title: 'Get Analysis Job Status',
-      description: 'Checks the status of an analysis job by job ID.',
+      title: tSync('mcp.tools.getJobStatus.title'),
+      description: tSync('mcp.tools.getJobStatus.description'),
       inputSchema: {
         jobId: z.string().describe('The job ID returned from analyze-project'),
       },
@@ -158,12 +164,14 @@ function createMCPServer(): McpServer {
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error getting job status: ${error.message}`,
+              text: tSync('mcp.tools.getJobStatus.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -176,8 +184,8 @@ function createMCPServer(): McpServer {
   server.registerTool(
     'get-analysis-report',
     {
-      title: 'Get Analysis Report',
-      description: 'Retrieves the full analysis report for a completed job.',
+      title: tSync('mcp.tools.getAnalysisReport.title'),
+      description: tSync('mcp.tools.getAnalysisReport.description'),
       inputSchema: {
         jobId: z.string().describe('The job ID of a completed analysis'),
         format: z
@@ -206,7 +214,7 @@ function createMCPServer(): McpServer {
             content: [
               {
                 type: 'text' as const,
-                text: `Job is not completed or has no result. Status: ${job.status}`,
+                text: tSync('mcp.tools.getAnalysisReport.jobNotComplete', { status: job.status }),
               },
             ],
             isError: true,
@@ -255,12 +263,14 @@ Use format="json" for the full detailed report.
             ],
           };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error getting analysis report: ${error.message}`,
+              text: tSync('mcp.tools.getAnalysisReport.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -273,8 +283,8 @@ Use format="json" for the full detailed report.
   server.registerTool(
     'get-file-details',
     {
-      title: 'Get File Analysis Details',
-      description: 'Retrieves detailed analysis for a specific file from a completed analysis.',
+      title: tSync('mcp.tools.getFileDetails.title'),
+      description: tSync('mcp.tools.getFileDetails.description'),
       inputSchema: {
         jobId: z.string().describe('The job ID of a completed analysis'),
         filePath: z.string().describe('Path to the file to get details for'),
@@ -288,7 +298,7 @@ Use format="json" for the full detailed report.
             content: [
               {
                 type: 'text' as const,
-                text: `Job not found or not completed: ${jobId}`,
+                text: tSync('mcp.tools.getFileDetails.jobNotFound', { jobId }),
               },
             ],
             isError: true,
@@ -301,7 +311,7 @@ Use format="json" for the full detailed report.
             content: [
               {
                 type: 'text' as const,
-                text: `File not found in analysis: ${filePath}`,
+                text: tSync('mcp.tools.getFileDetails.fileNotFound', { filePath }),
               },
             ],
             isError: true,
@@ -331,12 +341,14 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error getting file details: ${error.message}`,
+              text: tSync('mcp.tools.getFileDetails.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -349,9 +361,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'check-file',
     {
-      title: 'Check Single File Usage',
-      description:
-        'Quickly check if a specific file is used in the project without running a full analysis.',
+      title: tSync('mcp.tools.checkFile.title'),
+      description: tSync('mcp.tools.checkFile.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project'),
         filePath: z.string().describe('Path to the file to check (relative to project root)'),
@@ -364,7 +375,11 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
         // Start quick file check in the background
         (async () => {
           try {
-            jobManager.updateJobStatus(job.id, 'processing', `Checking file: ${filePath}`);
+            jobManager.updateJobStatus(
+              job.id,
+              'processing',
+              tSync('mcp.tools.checkFile.checking', { filePath })
+            );
 
             const config: AnalysisConfig = {
               projectRoot: projectPath,
@@ -393,10 +408,10 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
               };
               jobManager.completeJob(job.id, filteredReport);
             } else {
-              jobManager.failJob(job.id, `File not found: ${filePath}`);
+              jobManager.failJob(job.id, tSync('mcp.tools.checkFile.fileNotFound', { filePath }));
             }
-          } catch (e: any) {
-            jobManager.failJob(job.id, e.message);
+          } catch (e: unknown) {
+            jobManager.failJob(job.id, e instanceof Error ? e.message : String(e));
           }
         })();
 
@@ -404,16 +419,18 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           content: [
             {
               type: 'text' as const,
-              text: `File check started: ${filePath}\nJob ID: ${job.id}\n\nUse get-job-status and get-analysis-report to get results.`,
+              text: tSync('mcp.tools.checkFile.started', { filePath, jobId: job.id }),
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error checking file: ${error.message}`,
+              text: tSync('mcp.tools.checkFile.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -426,8 +443,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'scan-directory',
     {
-      title: 'Scan Directory',
-      description: 'Analyze files within a specific directory and its subdirectories.',
+      title: tSync('mcp.tools.scanDirectory.title'),
+      description: tSync('mcp.tools.scanDirectory.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project'),
         directoryPath: z.string().describe('Directory to scan (relative to project root)'),
@@ -454,7 +471,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             jobManager.updateJobStatus(
               job.id,
               'processing',
-              `Scanning directory: ${directoryPath}`
+              tSync('mcp.tools.scanDirectory.scanning', { directoryPath })
             );
 
             const includePattern = options.recursive
@@ -474,8 +491,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             const analyzer = new NextJSAnalyzer(config);
             const report = await analyzer.analyze();
             jobManager.completeJob(job.id, report);
-          } catch (e: any) {
-            jobManager.failJob(job.id, e.message);
+          } catch (e: unknown) {
+            jobManager.failJob(job.id, e instanceof Error ? e.message : String(e));
           }
         })();
 
@@ -483,16 +500,22 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           content: [
             {
               type: 'text' as const,
-              text: `Directory scan started: ${directoryPath}\nRecursive: ${options.recursive}\nJob ID: ${job.id}\n\nUse get-job-status and get-analysis-report to get results.`,
+              text: tSync('mcp.tools.scanDirectory.started', {
+                directoryPath,
+                recursive: String(options.recursive ?? true),
+                jobId: job.id,
+              }),
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error scanning directory: ${error.message}`,
+              text: tSync('mcp.tools.scanDirectory.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -505,9 +528,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'scan-component-tree',
     {
-      title: 'Scan Component Tree',
-      description:
-        'Analyze a component and all its dependencies to see what would be affected if removed.',
+      title: tSync('mcp.tools.scanComponentTree.title'),
+      description: tSync('mcp.tools.scanComponentTree.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project'),
         componentPath: z.string().describe('Path to the root component to analyze'),
@@ -539,7 +561,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             jobManager.updateJobStatus(
               job.id,
               'processing',
-              `Analyzing component tree: ${componentPath}`
+              tSync('mcp.tools.scanComponentTree.analyzing', { componentPath })
             );
 
             // First run a full analysis to get dependency graph
@@ -559,7 +581,10 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             // Find the target component and its dependencies
             const targetFile = fullReport.files.find((f) => f.path.endsWith(componentPath));
             if (!targetFile) {
-              jobManager.failJob(job.id, `Component not found: ${componentPath}`);
+              jobManager.failJob(
+                job.id,
+                tSync('mcp.tools.scanComponentTree.componentNotFound', { componentPath })
+              );
               return;
             }
 
@@ -591,8 +616,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             };
 
             jobManager.completeJob(job.id, componentReport);
-          } catch (e: any) {
-            jobManager.failJob(job.id, e.message);
+          } catch (e: unknown) {
+            jobManager.failJob(job.id, e instanceof Error ? e.message : String(e));
           }
         })();
 
@@ -600,16 +625,22 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           content: [
             {
               type: 'text' as const,
-              text: `Component tree analysis started: ${componentPath}\nMax depth: ${options.maxDepth}\nJob ID: ${job.id}\n\nUse get-job-status and get-analysis-report to get results.`,
+              text: tSync('mcp.tools.scanComponentTree.started', {
+                componentPath,
+                maxDepth: String(options.maxDepth ?? 5),
+                jobId: job.id,
+              }),
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error analyzing component tree: ${error.message}`,
+              text: tSync('mcp.tools.scanComponentTree.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -622,8 +653,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'scan-api-routes',
     {
-      title: 'Scan API Routes',
-      description: 'Analyze only API routes to identify unused endpoints and their dependencies.',
+      title: tSync('mcp.tools.scanApiRoutes.title'),
+      description: tSync('mcp.tools.scanApiRoutes.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project'),
         options: z
@@ -648,7 +679,11 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
 
         (async () => {
           try {
-            jobManager.updateJobStatus(job.id, 'processing', 'Scanning API routes...');
+            jobManager.updateJobStatus(
+              job.id,
+              'processing',
+              tSync('mcp.tools.scanApiRoutes.scanning')
+            );
 
             const apiPatterns = [
               'pages/api/**/*',
@@ -698,8 +733,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             };
 
             jobManager.completeJob(job.id, apiReport);
-          } catch (e: any) {
-            jobManager.failJob(job.id, e.message);
+          } catch (e: unknown) {
+            jobManager.failJob(job.id, e instanceof Error ? e.message : String(e));
           }
         })();
 
@@ -707,16 +742,22 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           content: [
             {
               type: 'text' as const,
-              text: `API routes scan started\nInclude middleware: ${options.includeMiddleware}\nCheck usage: ${options.checkUsage}\nJob ID: ${job.id}\n\nUse get-job-status and get-analysis-report to get results.`,
+              text: tSync('mcp.tools.scanApiRoutes.started', {
+                includeMiddleware: String(options.includeMiddleware ?? true),
+                checkUsage: String(options.checkUsage ?? true),
+                jobId: job.id,
+              }),
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Error scanning API routes: ${error.message}`,
+              text: tSync('mcp.tools.scanApiRoutes.error', {
+                error: error instanceof Error ? error.message : String(error),
+              }),
             },
           ],
           isError: true,
@@ -730,8 +771,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
     'server-status',
     'status://server',
     {
-      title: 'Server Status',
-      description: 'Current status of the VibeAlive MCP server',
+      title: tSync('mcp.resources.serverStatus.title'),
+      description: tSync('mcp.resources.serverStatus.description'),
       mimeType: 'application/json',
     },
     async () => ({
@@ -759,9 +800,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'get-cli-commands',
     {
-      title: 'Get Available CLI Commands',
-      description:
-        'Returns information about available CLI commands and options for vibealive. This is informational only - agents cannot execute CLI commands directly.',
+      title: tSync('mcp.tools.getCliCommands.title'),
+      description: tSync('mcp.tools.getCliCommands.description'),
       inputSchema: {
         category: z
           .enum(['all', 'analysis', 'configuration', 'export'])
@@ -890,16 +930,20 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'analyze-theme-setup',
     {
-      title: 'Analyze Theme and Styling Setup',
-      description:
-        'Analyzes theme configuration, dark mode setup, CSS frameworks, and styling patterns in the Next.js project.',
+      title: tSync('mcp.tools.analyzeThemeSetup.title'),
+      description: tSync('mcp.tools.analyzeThemeSetup.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
     },
     async ({ projectPath }: { projectPath: string }) => {
       const job = jobManager.createJob();
-      jobManager.updateJobStatus(job.id, 'processing', 'Analyzing theme setup...', 10);
+      jobManager.updateJobStatus(
+        job.id,
+        'processing',
+        tSync('mcp.tools.analyzeThemeSetup.analyzing'),
+        10
+      );
 
       try {
         const analyzer = new NextJSAnalyzer({
@@ -925,13 +969,6 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
             ].includes(pkg.name)
           ) || [];
 
-        const result = {
-          themePackages: themeAnalysis,
-          patterns: report.nextjsAnalysis?.patterns || [],
-          recommendations: themeAnalysis.flatMap((pkg) => pkg.recommendations),
-          projectHealth: report.nextjsAnalysis?.projectHealth,
-        };
-
         // Create a modified report with theme analysis results
         const themeReport = { ...report };
         if (themeReport.nextjsAnalysis) {
@@ -947,11 +984,11 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           content: [
             {
               type: 'text',
-              text:
-                `Theme analysis completed!\n\n` +
-                `Found ${themeAnalysis.length} theme-related packages\n` +
-                `Health Score: ${report.nextjsAnalysis?.projectHealth?.score || 'N/A'}/100\n\n` +
-                `Job ID: ${job.id} - Check results with get-analysis-report`,
+              text: tSync('mcp.tools.analyzeThemeSetup.completed', {
+                packageCount: String(themeAnalysis.length),
+                healthScore: String(report.nextjsAnalysis?.projectHealth?.score || 'N/A'),
+                jobId: job.id,
+              }),
             },
           ],
         };
@@ -966,16 +1003,20 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'audit-seo-setup',
     {
-      title: 'Audit SEO Configuration',
-      description:
-        'Comprehensive SEO audit including metadata, sitemap, structured data, and social sharing setup.',
+      title: tSync('mcp.tools.auditSeoSetup.title'),
+      description: tSync('mcp.tools.auditSeoSetup.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
     },
     async ({ projectPath }: { projectPath: string }) => {
       const job = jobManager.createJob();
-      jobManager.updateJobStatus(job.id, 'processing', 'Auditing SEO setup...', 10);
+      jobManager.updateJobStatus(
+        job.id,
+        'processing',
+        tSync('mcp.tools.auditSeoSetup.auditing'),
+        10
+      );
 
       try {
         const analyzer = new NextJSAnalyzer({
@@ -996,16 +1037,6 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
 
         const seoIssues =
           report.nextjsAnalysis?.setupIssues.filter((issue) => issue.category === 'seo') || [];
-
-        const result = {
-          seoPackages,
-          seoIssues,
-          recommendations: [
-            ...seoPackages.flatMap((pkg) => pkg.recommendations),
-            ...seoIssues.flatMap((issue) => issue.recommendations),
-          ],
-          projectHealth: report.nextjsAnalysis?.projectHealth,
-        };
 
         // Create a modified report with SEO analysis results
         const seoReport = { ...report };
@@ -1043,9 +1074,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'scan-performance-issues',
     {
-      title: 'Scan Performance Optimization Opportunities',
-      description:
-        'Identifies performance issues including unoptimized images, missing loading states, bundle size problems, and font optimization opportunities.',
+      title: tSync('mcp.tools.scanPerformanceIssues.title'),
+      description: tSync('mcp.tools.scanPerformanceIssues.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
@@ -1100,9 +1130,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'check-accessibility',
     {
-      title: 'Check Accessibility Compliance',
-      description:
-        'Comprehensive WCAG 2.2 accessibility audit including alt text, ARIA labels, heading structure, keyboard navigation, color contrast, focus management, drag-drop alternatives, authentication complexity, and Next.js specific accessibility patterns.',
+      title: tSync('mcp.tools.checkAccessibility.title'),
+      description: tSync('mcp.tools.checkAccessibility.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
@@ -1159,9 +1188,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'detect-nextjs-patterns',
     {
-      title: 'Detect Advanced Next.js Routing Patterns',
-      description:
-        'Identifies advanced Next.js routing patterns including route groups, private folders, intercepting routes, parallel routes, and dynamic route segments.',
+      title: tSync('mcp.tools.detectNextjsPatterns.title'),
+      description: tSync('mcp.tools.detectNextjsPatterns.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
       },
@@ -1221,9 +1249,8 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
   server.registerTool(
     'validate-project-health',
     {
-      title: 'Generate Comprehensive Project Health Report',
-      description:
-        'Provides an overall project health score with detailed analysis of strengths, areas for improvement, package configuration status, and actionable recommendations.',
+      title: tSync('mcp.tools.validateProjectHealth.title'),
+      description: tSync('mcp.tools.validateProjectHealth.description'),
       inputSchema: {
         projectPath: z.string().describe('Path to the Next.js project to analyze'),
         includeRecommendations: z
@@ -1232,13 +1259,7 @@ ${fileAnalysis.bundleSize ? `Bundle Size: ${fileAnalysis.bundleSize} bytes` : ''
           .describe('Include detailed recommendations (default: true)'),
       },
     },
-    async ({
-      projectPath,
-      includeRecommendations = true,
-    }: {
-      projectPath: string;
-      includeRecommendations?: boolean;
-    }) => {
+    async ({ projectPath }: { projectPath: string; includeRecommendations?: boolean }) => {
       const job = jobManager.createJob();
 
       try {
@@ -1306,7 +1327,7 @@ export async function startMCPServerStdio(): Promise<void> {
  * Supports modern Streamable HTTP and legacy SSE for backwards compatibility
  */
 export function startMCPServerHTTP(port: number): Server {
-  console.log(chalk.blue('🚀 Starting MCP HTTP Server with v2025-03-26 standards...'));
+  console.log(chalk.blue(tSync('mcp.server.starting')));
 
   const app = express();
   app.use(express.json());
@@ -1394,9 +1415,9 @@ export function startMCPServerHTTP(port: number): Server {
   });
 
   // Legacy SSE endpoint for backwards compatibility with older clients
-  app.get('/sse', async (req, res) => {
+  app.get('/sse', async (_req, res) => {
     try {
-      console.log(chalk.yellow('📡 Legacy SSE client connecting (deprecated)'));
+      console.log(chalk.yellow(tSync('mcp.server.clientConnecting')));
 
       const transport = new SSEServerTransport('/messages', res);
       transports.sse[transport.sessionId] = transport;
@@ -1461,16 +1482,21 @@ export function startMCPServerHTTP(port: number): Server {
   });
 
   const server = app.listen(port, 'localhost', () => {
-    console.log(chalk.green(`✅ MCP Server running on http://localhost:${port}`));
-    console.log(chalk.blue(`🔗 Modern endpoint: http://localhost:${port}/mcp`));
-    console.log(chalk.yellow(`🔗 Legacy endpoint: http://localhost:${port}/sse`));
-    console.log(chalk.cyan(`📋 Protocol: v2025-03-26 with backwards compatibility`));
+    console.log(chalk.green(tSync('mcp.server.running', { port })));
+    console.log(chalk.blue(tSync('mcp.server.modernEndpoint', { port })));
+    console.log(chalk.yellow(tSync('mcp.server.legacyEndpoint', { port })));
+    console.log(chalk.cyan(tSync('mcp.server.protocol')));
     console.log(
       chalk.magenta(
-        `🛡️  Security: ${process.env.NODE_ENV === 'production' ? 'Enabled (DNS rebinding protection)' : 'Development mode'}`
+        tSync('mcp.server.security', {
+          status:
+            process.env.NODE_ENV === 'production'
+              ? 'Enabled (DNS rebinding protection)'
+              : 'Development mode',
+        })
       )
     );
-    console.log(chalk.green(`🌐 CORS: Enabled for browser clients`));
+    console.log(chalk.green(tSync('mcp.server.cors')));
   });
 
   return server;
